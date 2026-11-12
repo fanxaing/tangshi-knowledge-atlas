@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全唐诗 · 知识图谱 | Tang Poetry Knowledge Atlas</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="description" content="基于《全唐诗》完整语料构建的唐诗知识图谱：诗人、题材、意象、地名、典故的关联网络。">
+<style>
+/* ============================================================
+   全唐诗 · 知识图谱  —  长安诗境
+   调色：靛蓝夜空 + 金色流光 + 玄月星尘
+   ============================================================ */
+:root{
+  /* 夜空 — 由深至浅 */
+  --sky-0:#04080f;     /* 最深处，页面底色 */
+  --sky-1:#08111e;     /* 卡片/面板底色 */
+  --sky-2:#0d1a2e;     /* 高一级的玻璃面板 */
+  --sky-3:#14223a;     /* 输入框底/分隔条 */
+  --sky-4:#1d2e4d;     /* 按钮hover底 */
+  /* 月华 — 月白主/夜间灯 */
+  --moon:#f6e7c2;
+  --moon-soft:#e8d49c;
+  /* 金 — 主金色系（唐代最常用） */
+  --gold:#e8c47a;      /* 主金 */
+  --gold-bright:#f6dba0; /* 亮金（高亮/标题） */
+  --gold-deep:#b89048;  /* 暗金（边线/次文字） */
+  --gold-dim:#7d6234;   /* 极弱金（占位/分隔） */
+  /* 朱红 — 盛唐 */
+  --cinnabar:#e85a3c;
+  --cinnabar-soft:#f07a5d;
+  /* 黛青 — 初唐/山水 */
+  --dai:#6f9fb8;
+  /* 玉绿 — 意象 */
+  --jade:#7ab89c;
+  /* 琥珀 — 地名 */
+  --ochre:#d49e5a;
+  /* 紫金 — 典故 */
+  --violet:#b08dcc;
+  /* 钢青 — 并称 */
+  --slate:#7a92ad;
+  /* 灵青 — 影响源（玄境色） */
+  --spirit:#7fd8e8;
+  /* 文字 */
+  --ink-1:#f0d896;     /* 一级 — 主文字 */
+  --ink-2:#c8b89a;     /* 二级 — 副文字 */
+  --ink-3:#8a8270;     /* 三级 — 弱文字/标签 */
+  --ink-4:#5d5446;     /* 四级 — 极弱 */
+  /* 线 */
+  --line:rgba(232,196,122,.14);
+  --line-2:rgba(232,196,122,.28);
+  --line-strong:rgba(232,196,122,.55);
+  /* 阴影 — 深空中透金 */
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 12px 32px rgba(0,0,0,.45);
+  --glow-gold:0 0 12px rgba(232,196,122,.35),0 0 28px rgba(232,196,122,.18);
+  --glow-moon:0 0 24px rgba(246,215,160,.4);
+  /* 字体 */
+  --serif:"Songti SC","STSong","Source Han Serif SC","Noto Serif CJK SC","SimSun",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink-1);font-family:var(--sans);
+  font-size:13px;line-height:1.6;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  /* 夜空底色 + 玄月侧光晕 */
+  background:
+    radial-gradient(ellipse 900px 700px at 85% -8%,rgba(246,215,160,.14),transparent 65%),
+    radial-gradient(ellipse 600px 500px at 8% 110%,rgba(127,216,232,.06),transparent 60%),
+    linear-gradient(180deg,#050b16 0%,#07111e 40%,#04080f 100%);
+}
+/* 星尘背景层 — 由 JS 在 stage 上画一层 canvas */
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(232,196,122,.18);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:rgba(232,196,122,.32)}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------------- 顶栏 ---------------- */
+header{
+  height:62px;display:flex;align-items:center;gap:18px;padding:0 22px;
+  background:linear-gradient(180deg,rgba(13,26,46,.85),rgba(8,17,30,.85));
+  border-bottom:1px solid var(--line-2);position:relative;z-index:30;
+  backdrop-filter:blur(10px);
+}
+header::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent 5%,var(--gold-deep) 30%,var(--gold) 50%,var(--gold-deep) 70%,transparent 95%);
+  opacity:.55;
+}
+.brand{display:flex;align-items:center;gap:14px;white-space:nowrap}
+.brand h1{
+  font-family:var(--serif);font-size:22px;margin:0;letter-spacing:.12em;font-weight:600;
+  color:var(--gold-bright);
+  text-shadow:0 0 12px rgba(232,196,122,.35);
+}
+.brand .en{font-size:10.5px;color:var(--gold-deep);letter-spacing:.22em;text-transform:uppercase;font-family:var(--serif)}
+.brand .seal{
+  width:30px;height:30px;border-radius:4px;
+  background:linear-gradient(160deg,#c8452a 0%,#a02c1a 60%,#7a1d0e 100%);
+  color:#f8e8c0;font-family:var(--serif);font-size:16px;font-weight:700;
+  display:grid;place-items:center;
+  border:1px solid var(--gold-deep);
+  box-shadow:0 0 10px rgba(232,196,122,.35),inset 0 0 6px rgba(0,0,0,.4);flex:none;
+  letter-spacing:0;
+}
+.chips{display:flex;gap:7px;flex-wrap:nowrap;overflow:hidden}
+.chip{
+  background:rgba(20,34,58,.5);border:1px solid var(--line);border-radius:20px;
+  padding:3px 12px;font-size:11.5px;color:var(--ink-2);white-space:nowrap;
+}
+.chip b{color:var(--gold-bright);font-weight:600;font-variant-numeric:tabular-nums;margin-left:4px;
+  text-shadow:0 0 8px rgba(232,196,122,.25);}
+.spacer{flex:1}
+.topbtn{
+  background:rgba(20,34,58,.5);border:1px solid var(--line-2);border-radius:7px;padding:5px 14px;
+  cursor:pointer;color:var(--ink-2);transition:.18s;white-space:nowrap;
+  letter-spacing:.08em;
+}
+.topbtn:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(232,196,122,.08);
+  box-shadow:0 0 10px rgba(232,196,122,.2);}
+
+/* ---------------- 三栏 ---------------- */
+main{display:flex;height:calc(100% - 62px)}
+aside{
+  background:rgba(8,17,30,.65);overflow-y:auto;overflow-x:hidden;flex:none;
+  backdrop-filter:blur(8px);
+}
+#left{width:306px;border-right:1px solid var(--line);padding:14px 16px 40px}
+#right{width:392px;border-left:1px solid var(--line);padding:0}
+#stage{flex:1;position:relative;min-width:0;overflow:hidden;
+  background:
+    /* 月华右侧高光 */
+    radial-gradient(ellipse 700px 480px at 92% -6%,rgba(232,196,122,.16),transparent 60%),
+    /* 灵青左侧幽光 */
+    radial-gradient(ellipse 480px 360px at 0% 100%,rgba(127,216,232,.08),transparent 60%),
+    /* 夜空底 */
+    linear-gradient(180deg,#08111e 0%,#04080f 100%);
+}
+/* 唐宫剪影 — 在画布底部，配一层暖色城辉 */
+#stage::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:128px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 128' preserveAspectRatio='none'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23000' stop-opacity='0'/><stop offset='1' stop-color='%23000' stop-opacity='1'/></linearGradient><linearGradient id='glow' x1='0' y1='000' x2='0' y2='1'><stop offset='0' stop-color='%23f6d7a0' stop-opacity='0'/><stop offset='0.62' stop-color='%23e8c47a' stop-opacity='0.07'/><stop offset='1' stop-color='%23e8c47a' stop-opacity='0.16'/></linearGradient></defs><rect x='0' y='0' width='1600' height='128' fill='url(%23glow)'/><g fill='%23040812' stroke='%23b89048' stroke-width='0.7' stroke-opacity='0.8'><path d='M0,128 L0,96 L60,96 L60,86 L80,86 L80,62 L100,62 L100,52 L116,52 L116,40 L120,40 L120,52 L134,52 L134,62 L150,62 L150,86 L168,86 L168,96 L210,96 L210,82 L228,82 L228,56 L240,56 L240,40 L246,40 L246,28 L252,28 L252,18 L258,18 L258,28 L264,28 L264,40 L270,40 L270,56 L282,56 L282,82 L302,82 L302,96 L360,96 L360,78 L378,78 L378,50 L392,50 L392,36 L400,36 L400,26 L408,26 L408,36 L416,36 L416,50 L430,50 L430,78 L448,78 L448,96 L530,96 L530,68 L548,68 L548,42 L560,28 L564,28 L564,18 L570,18 L570,28 L576,28 L576,42 L590,42 L590,68 L608,68 L608,96 L688,96 L688,82 L708,82 L708,52 L720,38 L728,38 L728,24 L736,24 L736,14 L744,14 L744,24 L752,24 L752,38 L764,38 L764,52 L778,52 L778,82 L796,82 L796,96 L860,96 L860,66 L878,60 L898,48 L908,38 L918,48 L938,60 L956,66 L956,96 L1018,96 L1018,82 L1038,82 L1038,56 L1052,56 L1052,38 L1062,38 L1062,26 L1070,26 L1070,38 L1080,38 L1080,56 L1094,56 L1094,82 L1114,82 L1114,96 L1190,96 L1190,72 L1208,72 L1208,44 L1222,44 L1222,28 L1230,28 L1230,18 L1238,18 L1238,28 L1246,28 L1246,44 L1260,44 L1260,72 L1278,72 L1278,96 L1342,96 L1342,86 L1360,86 L1360,62 L1372,62 L1372,48 L1382,48 L1382,34 L1390,34 L1390,24 L1398,24 L1398,34 L1406,34 L1406,48 L1416,48 L1416,62 L1428,62 L1428,86 L1446,86 L1446,96 L1510,96 L1510,78 L1528,78 L1528,50 L1542,50 L1542,36 L1552,36 L1552,24 L1560,24 L1560,36 L1570,36 L1570,50 L1584,50 L1584,78 L1600,78 L1600,128 Z'/></g><g fill='%23f6dba0' fill-opacity='0.3'><rect x='248' y='30' width='6' height='3'/><rect x='269' y='50' width='4' height='2'/><rect x='396' y='40' width='6' height='3'/><rect x='418' y='48' width='4' height='2'/><rect x='568' y='32' width='6' height='3'/><rect x='734' y='24' width='6' height='3'/><rect x='1067' y='42' width='5' height='3'/><rect x='1232' y='30' width='6' height='3'/><rect x='1394' y='38' width='5' height='3'/><rect x='1554' y='42' width='5' height='3'/></g><rect x='0' y='0' width='1600' height='128' fill='url(%23g)'/></svg>");
+  background-size:100% 100%;background-repeat:no-repeat;
+  pointer-events:none;z-index:1;
+}
+/* 烛灯点缀 — 在剪影前的小灯笼 */
+#stage::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:128px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 128' preserveAspectRatio='none'><g><circle cx='250' cy='42' r='3.2' fill='%23f6dba0'><animate attributeName='opacity' values='0.4;1;0.4' dur='2.6s' repeatCount='indefinite'/></circle><circle cx='400' cy='38' r='2.6' fill='%23f6dba0'><animate attributeName='opacity' values='0.5;1;0.5' dur='3.1s' begin='0.4s' repeatCount='indefinite'/></circle><circle cx='568' cy='30' r='2.8' fill='%23f6dba0'><animate attributeName='opacity' values='0.4;1;0.4' dur='2.9s' begin='0.7s' repeatCount='indefinite'/></circle><circle cx='738' cy='20' r='3.2' fill='%23f6dba0'><animate attributeName='opacity' values='0.6;1;0.6' dur='2.3s' begin='0.2s' repeatCount='indefinite'/></circle><circle cx='1068' cy='38' r='2.6' fill='%23f6dba0'><animate attributeName='opacity' values='0.5;1;0.5' dur='3.4s' begin='0.9s' repeatCount='indefinite'/></circle><circle cx='1232' cy='28' r='2.8' fill='%23f6dba0'><animate attributeName='opacity' values='0.4;1;0.4' dur='2.7s' begin='0.3s' repeatCount='indefinite'/></circle><circle cx='1396' cy='36' r='2.6' fill='%23f6dba0'><animate attributeName='opacity' values='0.6;1;0.6' dur='3.2s' begin='0.6s' repeatCount='indefinite'/></circle><circle cx='1556' cy='40' r='2.6' fill='%23f6dba0'><animate attributeName='opacity' values='0.5;1;0.5' dur='2.8s' begin='1.1s' repeatCount='indefinite'/></circle></g></svg>");
+  background-size:100% 100%;background-repeat:no-repeat;
+  pointer-events:none;z-index:2;
+  filter:drop-shadow(0 0 5px rgba(246,215,160,.8));
+}
+.sec{margin-bottom:18px}
+.sec>h3{
+  font-family:var(--serif);font-size:12.5px;letter-spacing:.22em;color:var(--gold-bright);
+  margin:0 0 10px;font-weight:600;display:flex;align-items:center;gap:9px;
+}
+.sec>h3::after{content:"";flex:1;height:1px;
+  background:linear-gradient(90deg,var(--gold-deep),transparent);}
+
+/* 搜索 */
+.searchbox{position:relative}
+.searchbox input{
+  width:100%;padding:9px 32px 9px 13px;border:1px solid var(--line-2);border-radius:8px;
+  background:rgba(20,34,58,.5);outline:none;transition:.18s;
+  color:var(--ink-1);
+}
+.searchbox input::placeholder{color:var(--ink-3);font-style:italic;letter-spacing:.05em}
+.searchbox input:focus{border-color:var(--gold);background:rgba(13,26,46,.85);
+  box-shadow:0 0 0 3px rgba(232,196,122,.12),0 0 14px rgba(232,196,122,.2);}
+.searchbox .k{
+  position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;
+  color:var(--gold-deep);border:1px solid var(--line-2);border-radius:4px;padding:0 5px;
+  background:rgba(13,26,46,.85);
+}
+.results{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;background:rgba(8,17,30,.95);z-index:50;
+  border:1px solid var(--line-2);border-radius:8px;box-shadow:var(--shadow);
+  max-height:300px;overflow-y:auto;display:none;
+  backdrop-filter:blur(10px);
+}
+.results.on{display:block}
+.results .row{
+  padding:7px 11px;cursor:pointer;display:flex;align-items:center;gap:9px;
+  border-bottom:1px solid var(--line);
+}
+.results .row:last-child{border-bottom:0}
+.results .row:hover,.results .row.act{background:rgba(232,196,122,.1)}
+.results .dot{width:8px;height:8px;border-radius:50%;flex:none;
+  box-shadow:0 0 7px rgba(232,196,122,.7);}
+.results .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-1)}
+.results .tp{font-size:10.5px;color:var(--gold-deep);flex:none;font-family:var(--serif);letter-spacing:.08em}
+.results .empty{padding:12px;color:var(--ink-3);text-align:center}
+
+/* 筛选 */
+.views{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vbtn{
+  border:1px solid var(--line-2);background:rgba(20,34,58,.5);border-radius:8px;padding:7px 4px;
+  cursor:pointer;text-align:center;transition:.18s;font-size:12px;color:var(--ink-2);
+  font-family:var(--serif);letter-spacing:.1em;
+}
+.vbtn:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(232,196,122,.08)}
+.vbtn.on{
+  background:linear-gradient(180deg,#a8341f 0%,#7a1d0e 100%);
+  border-color:var(--gold-deep);color:#f8e8c0;
+  box-shadow:0 0 10px rgba(232,196,122,.3),inset 0 0 6px rgba(0,0,0,.4);
+}
+.periods{display:flex;flex-wrap:wrap;gap:6px}
+.pbtn{
+  border:1px solid var(--line);border-radius:20px;padding:4px 12px;cursor:pointer;
+  background:rgba(20,34,58,.4);
+  font-size:12px;transition:.15s;display:flex;align-items:center;gap:6px;color:var(--ink-2);
+}
+.pbtn .sw{width:8px;height:8px;border-radius:50%;box-shadow:0 0 5px rgba(232,196,122,.6)}
+.pbtn.on{border-color:var(--gold);background:rgba(232,196,122,.1);color:var(--gold-bright);font-weight:600}
+.pbtn:not(.on){opacity:.5}
+.legendrow{display:flex;align-items:center;gap:9px;padding:5px 7px;border-radius:6px;cursor:pointer;transition:.12s}
+.legendrow:hover{background:rgba(232,196,122,.08)}
+.legendrow.off{opacity:.3}
+.legendrow .sw{width:11px;height:11px;border-radius:3px;flex:none;box-shadow:0 0 6px rgba(232,196,122,.55)}
+.legendrow .cnt{margin-left:auto;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* 统计条 */
+.bar{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;cursor:pointer;transition:.12s}
+.bar:hover{background:rgba(232,196,122,.08)}
+.bar .lb{width:54px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ink-2)}
+.bar .track{flex:1;height:6px;background:rgba(232,196,122,.08);border-radius:4px;overflow:hidden}
+.bar .fill{display:block;height:100%;border-radius:4px;transition:width .5s cubic-bezier(.2,.9,.3,1);
+  box-shadow:0 0 6px rgba(232,196,122,.45);}
+.bar .vv{width:36px;text-align:right;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* ---------------- 画布工具条 ---------------- */
+.tools{
+  position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;z-index:10;
+  max-width:calc(100% - 28px);
+}
+.tool{
+  background:rgba(8,17,30,.7);border:1px solid var(--line-2);border-radius:7px;
+  padding:6px 12px;cursor:pointer;transition:.18s;backdrop-filter:blur(8px);font-size:12px;
+  display:flex;align-items:center;gap:6px;color:var(--ink-2);
+  font-family:var(--serif);letter-spacing:.08em;
+}
+.tool:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(232,196,122,.1);
+  box-shadow:0 0 10px rgba(232,196,122,.25);}
+.tool.on{
+  background:linear-gradient(180deg,rgba(232,196,122,.22),rgba(184,144,72,.14));
+  border-color:var(--gold);color:var(--gold-bright);font-weight:600;
+  box-shadow:0 0 12px rgba(232,196,122,.35),inset 0 0 8px rgba(232,196,122,.12);
+}
+#legend{
+  position:absolute;left:14px;bottom:138px;background:rgba(8,17,30,.78);border:1px solid var(--line);
+  border-radius:9px;padding:9px 12px 10px;backdrop-filter:blur(8px);z-index:10;box-shadow:var(--shadow);
+  font-size:11.5px;line-height:1.8;width:216px;
+}
+#legend>div:first-child{font-family:var(--serif);letter-spacing:.2em;color:var(--gold-bright);margin-bottom:6px;font-size:12px;
+  text-shadow:0 0 6px rgba(232,196,122,.3);}
+#legendrows{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px}
+#legend .legendrow{padding:2px 4px;gap:6px;font-size:11px}
+#legend .legendrow .cnt{font-size:10.5px}
+#legend .li{display:flex;align-items:center;gap:8px}
+#legend .sw{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 6px rgba(232,196,122,.55)}
+#hint{
+  position:absolute;right:14px;bottom:138px;color:var(--ink-2);font-size:11px;z-index:10;
+  background:rgba(8,17,30,.7);padding:6px 12px;border-radius:7px;border:1px solid var(--line);
+  backdrop-filter:blur(8px);
+  font-family:var(--serif);letter-spacing:.08em;
+}
+#cy{position:absolute;inset:0;z-index:5}
+/* 暗角 — 把视线聚到图心（位于图谱之上，克制的边缘压暗） */
+#stage>.vignette{
+  position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:
+    radial-gradient(ellipse 66% 62% at 50% 44%,rgba(232,196,122,.06),transparent 72%),
+    radial-gradient(ellipse 108% 104% at 50% 46%,transparent 68%,rgba(4,8,15,.42) 100%);
+}
+#empty{
+  position:absolute;inset:0;display:none;place-items:center;
+  font-family:var(--serif);letter-spacing:.18em;z-index:7;
+  color:var(--gold-bright);
+  text-shadow:0 0 14px rgba(232,196,122,.4);font-size:15px;
+}
+#empty.on{display:grid}
+
+/* ---------------- 详情卡 ---------------- */
+.card{padding:0 22px 50px}
+.cardhead{
+  position:sticky;top:0;padding:22px 0 14px;border-bottom:1px solid var(--line-2);z-index:5;
+  background:linear-gradient(180deg,rgba(8,17,30,.95) 70%,rgba(8,17,30,.55));
+  backdrop-filter:blur(6px);
+}
+.cardhead .tname{
+  font-family:var(--serif);font-size:32px;letter-spacing:.08em;line-height:1.15;font-weight:600;
+  color:var(--gold-bright);
+  text-shadow:0 0 14px rgba(232,196,122,.3);
+}
+.cardhead .meta{color:var(--ink-3);font-size:12px;margin-top:7px;display:flex;flex-wrap:wrap;gap:12px;
+  font-family:var(--serif);letter-spacing:.1em;}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.tag{
+  font-size:11px;padding:3px 11px;border-radius:20px;border:1px solid var(--line-2);
+  color:var(--ink-2);background:rgba(20,34,58,.5);cursor:pointer;transition:.13s;
+  font-family:var(--serif);letter-spacing:.08em;
+}
+.tag:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(232,196,122,.1);
+  box-shadow:0 0 8px rgba(232,196,122,.25);}
+.quote{
+  font-family:var(--serif);font-size:15px;line-height:1.95;color:var(--ink-1);
+  background:linear-gradient(180deg,rgba(20,34,58,.4),rgba(13,26,46,.3));
+  border-left:3px solid var(--gold);
+  padding:14px 18px;border-radius:0 8px 8px 0;margin:18px 0;
+  position:relative;
+  box-shadow:0 0 16px rgba(232,196,122,.08);
+}
+.quote::before{content:"";position:absolute;left:-3px;top:-3px;bottom:-3px;width:3px;
+  background:linear-gradient(180deg,transparent,var(--gold-bright),transparent);
+  box-shadow:0 0 10px var(--gold);}
+.bio{color:var(--ink-2);font-size:12.5px;line-height:1.9;max-height:142px;overflow-y:auto;padding-right:8px}
+.bigstat{display:flex;align-items:baseline;gap:7px;margin:16px 0 6px}
+.bigstat b{font-family:var(--serif);font-size:30px;color:var(--gold-bright);font-variant-numeric:tabular-nums;
+  text-shadow:0 0 12px rgba(232,196,122,.35);}
+.bigstat span{color:var(--ink-3);font-size:12px;font-family:var(--serif);letter-spacing:.08em}
+.work{
+  border:1px solid var(--line);border-radius:9px;margin-bottom:11px;overflow:hidden;
+  background:rgba(13,26,46,.45);
+  position:relative;
+}
+.work::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,transparent,var(--gold-deep),transparent);
+  opacity:.6;}
+.work.open::before{background:linear-gradient(180deg,var(--gold-bright),var(--gold));opacity:1;
+  box-shadow:0 0 8px var(--gold);}
+.work .wt{
+  padding:9px 14px 9px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;
+  font-family:var(--serif);font-size:14.5px;transition:.13s;
+  color:var(--ink-1);letter-spacing:.05em;
+}
+.work .wt:hover{background:rgba(232,196,122,.06)}
+.work .wt::before{content:"◈";color:var(--gold);font-size:11px;text-shadow:0 0 6px rgba(232,196,122,.6)}
+.work .wt .auto{margin-left:auto;font-size:10px;color:var(--gold-deep);font-family:var(--sans);
+  letter-spacing:.08em;}
+.work .wb{display:none;padding:14px 18px 16px;border-top:1px solid var(--line)}
+.work.open .wb{display:block}
+.work .ln{
+  font-family:var(--serif);font-size:16px;line-height:2.15;letter-spacing:.06em;
+  color:var(--ink-1);
+  margin:0 0 6px;white-space:pre-wrap;
+}
+.work .ln:last-child{margin-bottom:0}
+.cta{font-size:11px;color:var(--gold-deep);margin-top:10px;text-align:right;
+  font-family:var(--serif);letter-spacing:.12em;}
+.dimlegend{display:flex;flex-wrap:wrap;gap:6px}
+.dchip{
+  border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer;
+  background:rgba(20,34,58,.5);font-size:12px;transition:.13s;
+  display:flex;align-items:center;gap:7px;color:var(--ink-2);
+  font-family:var(--serif);letter-spacing:.05em;
+}
+.dchip:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(232,196,122,.1)}
+.dchip .w{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.rel{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:7px;cursor:pointer;transition:.12s}
+.rel:hover{background:rgba(232,196,122,.08)}
+.rel .rn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-1)}
+.rel .rw{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.relbar{height:4px;border-radius:3px;background:rgba(232,196,122,.08);width:46px;flex:none;overflow:hidden}
+.relbar i{display:block;height:100%;background:var(--cinnabar-soft);box-shadow:0 0 5px rgba(240,122,93,.6)}
+.placeholder{
+  padding:80px 28px;text-align:center;color:var(--ink-2);font-family:var(--serif);
+  font-size:14.5px;line-height:2.2;letter-spacing:.08em;
+}
+.placeholder .ic{font-size:38px;color:var(--gold);display:block;margin-bottom:18px;
+  text-shadow:0 0 14px rgba(232,196,122,.5);animation:moonPulse 3.5s ease-in-out infinite;}
+@keyframes moonPulse{0%,100%{opacity:.55;text-shadow:0 0 14px rgba(232,196,122,.4)}
+  50%{opacity:1;text-shadow:0 0 22px rgba(232,196,122,.7)}}
+.kv{display:grid;grid-template-columns:62px 1fr;gap:5px 10px;font-size:12.5px;margin:10px 0 0}
+.kv dt{color:var(--gold-deep)}
+.kv dd{margin:0;color:var(--ink-2)}
+
+/* ---------------- 关于 ---------------- */
+#about{
+  position:fixed;inset:0;background:rgba(4,8,15,.78);z-index:100;display:none;
+  place-items:center;backdrop-filter:blur(6px);padding:24px;
+}
+#about.on{display:grid}
+#about .box{
+  background:linear-gradient(180deg,rgba(13,26,46,.96),rgba(8,17,30,.96));
+  border:1px solid var(--line-2);
+  border-radius:14px;max-width:720px;width:100%;max-height:84vh;overflow-y:auto;
+  padding:32px 36px 36px;box-shadow:var(--shadow),0 0 40px rgba(232,196,122,.12);
+}
+#about h2{font-family:var(--serif);margin:0 0 6px;font-size:24px;letter-spacing:.08em;
+  color:var(--gold-bright);text-shadow:0 0 10px rgba(232,196,122,.3);}
+#about h4{font-family:var(--serif);margin:24px 0 8px;font-size:14px;color:var(--gold);letter-spacing:.14em}
+#about p,#about li{color:var(--ink-2);font-size:13px;line-height:2}
+#about a{color:var(--gold-bright);text-decoration:none;border-bottom:1px dashed var(--gold-deep)}
+#about a:hover{color:var(--gold-bright);border-bottom-color:var(--gold)}
+#about code{background:rgba(20,34,58,.5);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--moon-soft);
+  border:1px solid var(--line);}
+#about .close{float:right;cursor:pointer;color:var(--ink-3);font-size:22px;line-height:1;margin-top:-4px}
+#about .close:hover{color:var(--gold-bright)}
+
+#loading{
+  position:fixed;inset:0;display:grid;place-items:center;z-index:200;
+  font-family:var(--serif);letter-spacing:.32em;font-size:14px;
+  color:var(--gold-bright);
+  background:
+    radial-gradient(ellipse 600px 400px at 50% 50%,rgba(232,196,122,.16),transparent 70%),
+    linear-gradient(180deg,#050b16 0%,#07111e 40%,#04080f 100%);
+}
+#loading::before{
+  content:"";display:block;width:120px;height:120px;margin:0 auto 30px;
+  background:
+    radial-gradient(circle at 34% 32%,#fffaf0 0%,#f8ecc8 26%,#eed9a4 52%,#c9a463 80%,#9a7a42 100%);
+  border-radius:50%;
+  box-shadow:0 0 60px rgba(232,196,122,.45),0 0 120px rgba(232,196,122,.25),
+             inset -10px -12px 26px rgba(150,115,58,.45),
+             inset 6px 6px 18px rgba(255,250,235,.25);
+  animation:moonRise 3.5s ease-in-out infinite;
+}
+#loading::after{
+  content:"";position:absolute;width:520px;height:1px;bottom:calc(50% - 110px);
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.55;
+  animation:titleGlow 2.4s ease-in-out infinite;
+}
+#loading .loadtxt{position:relative;z-index:1;text-shadow:0 0 14px rgba(232,196,122,.4);}
+@keyframes moonRise{
+  0%,100%{transform:translateY(0) scale(1);box-shadow:0 0 60px rgba(232,196,122,.45),0 0 120px rgba(232,196,122,.25),inset -8px -10px 24px rgba(184,144,72,.5)}
+  50%{transform:translateY(-6px) scale(1.03);box-shadow:0 0 80px rgba(232,196,122,.6),0 0 160px rgba(232,196,122,.35),inset -8px -10px 24px rgba(184,144,72,.5)}
+}
+@keyframes titleGlow{0%,100%{opacity:.3;width:300px}50%{opacity:.7;width:520px}}
+#loading.off{display:none}
+@media(max-width:1180px){
+  #left{width:264px}#right{width:340px}
+}
+
+/* ---------------- 移动端：筛选抽屉 + 底部详情卡 ---------------- */
+.mobonly{display:none}
+#mobhint{display:none}
+#mask{position:fixed;left:0;right:0;top:56px;bottom:0;background:rgba(2,6,12,.62);z-index:40;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+#sheetclose{display:none}
+@media(max-width:900px){
+  header{height:56px;gap:8px;padding:0 12px}
+  .brand{gap:9px}
+  .brand .seal{width:28px;height:28px;font-size:15px}
+  .brand h1{font-size:16px;letter-spacing:.06em}
+  .brand .en{display:none}
+  header .chips{display:none}
+  .topbtn{padding:5px 10px;font-size:11.5px;letter-spacing:.04em}
+  .mobonly{display:inline-flex;align-items:center}
+  main{height:calc(100% - 56px);position:relative}
+  #stage{flex:1 1 100%;width:100%}
+  #left{
+    position:fixed;left:0;top:56px;bottom:0;width:288px;z-index:45;
+    transform:translateX(-101%);transition:transform .28s cubic-bezier(.3,.8,.4,1);
+    background:rgba(8,17,30,.985);box-shadow:20px 0 46px rgba(0,0,0,.6);
+    padding-bottom:calc(40px + env(safe-area-inset-bottom));
+  }
+  body.filter-open #left{transform:none}
+  body.filter-open #mask{opacity:1;pointer-events:auto}
+  #right{
+    position:fixed;left:0;right:0;bottom:0;width:auto;height:58vh;z-index:46;
+    transform:translateY(101%);transition:transform .3s cubic-bezier(.3,.8,.4,1);
+    background:rgba(8,17,30,.985);border-left:0;border-top:1px solid var(--line-2);
+    box-shadow:0 -20px 48px rgba(0,0,0,.65);overflow-y:auto;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  body.card-open #right{transform:none}
+  #sheetclose{
+    display:grid;place-items:center;position:absolute;right:10px;top:10px;z-index:8;
+    width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);
+    background:rgba(20,34,58,.85);color:var(--gold);font-size:17px;line-height:1;cursor:pointer;
+  }
+  .card{padding:34px 18px 42px}
+  .tools{top:10px;left:10px;gap:5px;max-width:calc(100% - 20px)}
+  .tool{padding:5px 9px;font-size:11.5px;gap:4px}
+  #legend{display:none}
+  #hint{display:none}
+  #mobhint{
+    display:block;position:absolute;left:50%;transform:translateX(-50%);
+    bottom:calc(14px + env(safe-area-inset-bottom));z-index:10;pointer-events:none;
+    font-family:var(--serif);font-size:11px;letter-spacing:.06em;color:var(--ink-2);
+    background:rgba(8,17,30,.75);border:1px solid var(--line);border-radius:20px;
+    padding:5px 14px;backdrop-filter:blur(8px);white-space:nowrap;
+  }
+  #empty{font-size:13px;padding:0 24px;text-align:center}
+}
+@media(max-width:900px) and (orientation:landscape){
+  #right{
+    left:auto;right:0;top:56px;bottom:0;width:min(440px,58vw);height:auto;
+    transform:translateX(101%);border-top:0;border-left:1px solid var(--line-2);
+    box-shadow:-20px 0 48px rgba(0,0,0,.6);
+  }
+  body.card-open #right{transform:none}
+  .card{padding:30px 18px 32px}
+  #mobhint{bottom:10px}
+}
+@media(max-width:430px){
+  header{padding:0 10px;gap:6px}
+  .brand{gap:8px}
+  .brand h1{font-size:14px;letter-spacing:.02em}
+  .topbtn{padding:5px 8px;font-size:11px;letter-spacing:0}
+}
+</style>
+</head>
+<body>
+
+<div id="loading"><span class="loadtxt">正 在 展 卷 …</span></div>
+
+<header>
+  <div class="brand">
+    <div class="seal">唐</div>
+    <div>
+      <h1>全唐诗 · 知识图谱</h1>
+      <div class="en">Tang Poetry Knowledge Atlas</div>
+    </div>
+  </div>
+  <div class="chips" id="headchips"></div>
+  <div class="spacer"></div>
+  <button class="topbtn mobonly" id="filterbtn">筛选</button>
+  <button class="topbtn" id="resetbtn">重置视图</button>
+  <button class="topbtn" id="aboutbtn">数据说明</button>
+</header>
+
+<div id="mask"></div>
+
+<main>
+  <aside id="left">
+    <div class="sec">
+      <h3>检索</h3>
+      <div class="searchbox">
+        <input id="q" type="text" placeholder="诗人 / 意象 / 地名 / 典故 / 题材 / 影响源" autocomplete="off">
+        <span class="k">/</span>
+        <div class="results" id="results"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h3>视图</h3>
+      <div class="views" id="views"></div>
+    </div>
+
+    <div class="sec">
+      <h3>断代</h3>
+      <div class="periods" id="periods"></div>
+    </div>
+
+    <div class="sec">
+      <h3>图例 · 点击显隐</h3>
+      <div id="legendbox"></div>
+    </div>
+
+    <div class="sec">
+      <h3>存诗最多</h3>
+      <div id="statpoets"></div>
+    </div>
+
+    <div class="sec">
+      <h3>最高频意象</h3>
+      <div id="statimagery"></div>
+    </div>
+
+    <div class="sec">
+      <h3>最常出现地名</h3>
+      <div id="statplaces"></div>
+    </div>
+
+    <div class="sec">
+      <h3>并称与流派</h3>
+      <div class="dimlegend" id="statschools"></div>
+    </div>
+  </aside>
+
+  <section id="stage">
+    <div class="vignette"></div>
+    <div class="tools" id="tools"></div>
+    <div id="cy"></div>
+    <div id="legend">
+      <div style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold-bright);margin-bottom:6px;font-size:12px">图例</div>
+      <div id="legendrows"></div>
+    </div>
+    <div id="hint">滚轮缩放 · 拖拽平移 · 点击节点查看详情 · 双击空白复位</div>
+    <div id="mobhint">双指缩放 · 拖动平移 · 点节点看详情</div>
+    <div id="empty">当前筛选下没有可显示的节点</div>
+  </section>
+
+  <aside id="right">
+    <button id="sheetclose" aria-label="收起详情">×</button>
+    <div class="card" id="card">
+      <div class="placeholder">
+        <span class="ic">卷</span>
+        点击图谱中的任一节点<br>查看诗人、意象、地名与典故的详情
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div id="about">
+  <div class="box">
+    <span class="close" id="aboutclose">×</span>
+    <h2>数据说明与方法论</h2>
+    <p style="color:var(--ink-3);font-size:12px">全唐诗 · 知识图谱 — 以完整语料驱动的唐代诗歌关联网络</p>
+
+    <h4>数据来源</h4>
+    <p>诗作全文来自 GitHub 开源项目
+      <a href="https://github.com/chinese-poetry/chinese-poetry" target="_blank" rel="noopener">chinese-poetry/chinese-poetry</a>（公共领域 / Unlicense），
+      即《全唐诗》结构化整理本，共 <b id="a-poems">—</b> 首（去重后），作者 <b id="a-authors">—</b> 人。
+      原始文本为繁体，构建时统一繁转简。</p>
+
+    <h4>图谱如何生成</h4>
+    <ul>
+      <li><b>诗人筛选</b>：以存诗量为主要依据，结合文学史地位，选入 <b id="a-poets">—</b> 位名家；节点大小 = 该诗人在语料中的真实存诗量。</li>
+      <li><b>题材</b>：对每位诗人的全部作品做题目与正文的多标签关键词判定（送别、边塞、田园、山水、咏史怀古等 19 类），统计命中篇数作为边权重。</li>
+      <li><b>意象</b>：以正则词表在诗作正文中匹配（月、酒、柳、雁、孤、空等），同一首诗对同一意象只计一次，避免单篇长诗放大权重；意象之间的连线为同诗共现频次。</li>
+      <li><b>地名</b>：以唐代地名及其别称词表匹配（长安、扬州、玉门关、洞庭、庐山等 43 处），并标注今日所属区域。</li>
+      <li><b>典故</b>：以典故词表匹配，每则典故附出处与释义（桃源、易水、赤壁、望帝春心、莼鲈之思等 46 则）。</li>
+      <li><b>并称与影响</b>：李杜、元白、韩孟、小李杜等并称关系，以及师承、奖掖、唱和、影响等人际边，均据文学史共识人工标注。</li>
+      <li><b>名篇</b>：人工选目约 <b id="a-famous">—</b> 首名篇，正文全部由语料库自动回填校验，不含任何手工录入或臆造的诗句。</li>
+    </ul>
+
+    <h4>如何阅读</h4>
+    <p>「视图」用于切换关注维度，避免一次性呈现全部关系造成视觉过载：全景适合观察整体结构，单维度视图适合追问某个题材／意象／地名的分布。左侧统计条与图例均可点击，右侧详情卡支持逐层跳转。搜索框支持键盘 <code>/</code> 快速聚焦。</p>
+
+    <h4>技术实现</h4>
+    <p>纯静态单页：原生 JavaScript + <a href="https://js.cytoscape.org/" target="_blank" rel="noopener">Cytoscape.js</a> 力导向布局，
+      无框架、无构建步骤。数据以脚本形式注入，因此既能由任意 HTTP 服务器托管，也能直接双击 <code>index.html</code> 离线浏览。</p>
+
+    <h4>局限</h4>
+    <p>题材与意象均为关键词规则判定，存在误判与漏判；典故用词的判定以词表为准，未做语境消歧。图谱呈现的是「语料中的统计事实」，而不是对诗歌优劣的评价。欢迎指出疏漏。</p>
+  </div>
+</div>
+
+<!-- 零外链：Cytoscape 使用本地副本，不引入任何 CDN 兜底。
+     jsDelivr / npmmirror 等外部域名在大陆网络下可能被阻断或拖慢首屏，
+     本地副本（373 KB，可缓存）反而更快、更可靠，离线双击也能开。 -->
+<script src="cytoscape.min.js"></script>
+<script src="cytoscape-fcose.min.js"></script>
+<script src="meta.js"></script>
+<script src="graph.js"></script>
+<script src="poets.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ======================= 常量与配色 ======================= */
+/* 节点：月下唐色谱 */
+var COLORS = {
+  poet:"#e8c47a",       /* 主金 — 诗人（盛唐基调） */
+  theme:"#7fc8e0",      /* 灵青 — 题材 */
+  imagery:"#a8d8b8",    /* 玉绿 — 意象 */
+  place:"#d49e5a",      /* 琥珀 — 地名 */
+  allusion:"#c89adc",   /* 紫粉 — 典故 */
+  school:"#9ab0d0",     /* 钢青 — 并称 */
+  ext:"#7fd8e8"         /* 玄青 — 影响源 */
+};
+/* 断代 — 按唐代五色（青赤黄紫白）映射夜色 */
+var PERIOD_COLORS = {
+  "初唐":"#7fc8e0",   /* 黛青 */
+  "盛唐":"#f08a6c",   /* 朱赤 */
+  "中唐":"#e8c47a",   /* 鎏金 */
+  "晚唐":"#c89adc",   /* 紫金 */
+  "五代":"#9ab0d0"    /* 月白 */
+};
+var TYPE_NAMES = {poet:"诗人",theme:"题材",imagery:"意象",place:"地名",allusion:"典故",school:"并称",ext:"影响源"};
+var PERIODS = ["初唐","盛唐","中唐","晚唐","五代"];
+
+var VIEWS = [
+  {id:"all",      label:"全景图",   types:["poet","theme","imagery","place","allusion","school","ext"], len:78},
+  {id:"poet",     label:"诗人群像", types:["poet","school","ext"], len:96},
+  {id:"theme",    label:"题材分布", types:["poet","theme"], len:96},
+  {id:"imagery",  label:"意象网络", types:["poet","imagery"], len:88},
+  {id:"place",    label:"地理空间", types:["poet","place"], len:92},
+  {id:"allusion", label:"典故世界", types:["poet","allusion"], len:96},
+  {id:"era",      label:"断代分层", types:["poet","school"], len:120},
+  {id:"relations",label:"诗人关系", types:["poet","school","theme","ext"], len:104}
+];
+var LAYOUTS = [
+  {id:"nebula",      label:"星云"},
+  {id:"cose",        label:"力导向"},
+  {id:"concentric",  label:"同心圆"},
+  {id:"grid",        label:"时期网格"},
+  {id:"circle",      label:"环形"}
+];
+
+/* ======================= 数据 ======================= */
+var META = window.__META__ || {total_poems:0,total_authors:0,poet_count:0,node_count:0,edge_count:0};
+var POETS = window.__POETS__ || {};
+var RAW = window.__GRAPH__ || {nodes:[],edges:[]};
+
+var nodeIndex = {};
+RAW.nodes.forEach(function(n){ nodeIndex[n.id] = n; });
+
+// 只保留两端都存在的边
+var edges = RAW.edges.filter(function(e){ return nodeIndex[e.source] && nodeIndex[e.target]; });
+
+// 反向邻接索引：任一节点 -> 邻居及权重
+var adj = {};
+function addAdj(a,b,w,kind){
+  (adj[a] = adj[a] || []).push({id:b,w:w,kind:kind});
+  (adj[b] = adj[b] || []).push({id:a,w:w,kind:kind});
+}
+edges.forEach(function(e){ addAdj(e.source,e.target,e.weight,e.kind); });
+
+// 诗人一级邻居按类型分组（用于详情卡）
+var poetNeighbors = {};
+Object.keys(POETS).forEach(function(p){ poetNeighbors[p] = {}; });
+(adj && Object.keys(adj)).forEach(function(k){
+  if(k.indexOf("p:")!==0) return;
+  var name = k.slice(2), byType = {};
+  (adj[k]||[]).forEach(function(n){
+    var t = nodeIndex[n.id] ? nodeIndex[n.id].type : null;
+    if(!t) return;
+    (byType[t] = byType[t] || []).push(n);
+  });
+  poetNeighbors[name] = byType;
+});
+
+/* ======================= 状态 ======================= */
+var ST = {
+  view:"all",
+  layout:"nebula",
+  periods:PERIODS.slice(),
+  hiddenTypes:{},
+  minPoems:0,
+  selected:null,
+  query:""
+};
+
+/* ======================= 尺寸 / 样式 ======================= */
+function nodeSize(n){
+  var s = n.size || 1;
+  /* 直径压缩过一轮：原值最大到 70+，155 位诗人挤在一起必然互相盖住；
+     再给上限，防止高频题材块把内圈撑爆 */
+  if(n.type === "poet")  return Math.min(34, Math.max(9, 6 + Math.pow(s,0.40) * 1.16));
+  return Math.min(30, Math.max(11, 9 + Math.pow(s,0.38) * 1.25));
+}
+function nodeColor(n){
+  if(n.type === "poet") return PERIOD_COLORS[n.period] || COLORS.poet;
+  return COLORS[n.type] || "#888";
+}
+/* 夜色填充 — 把亮色压暗成「灯」的芯，亮色留给描边与光晕 */
+function darken(hex, k){
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  // 向夜空 (#0a1424) 混合，同时保留一点原色相
+  var base = [10,20,36];
+  function mix(c, t){ return Math.round(base[t] + (c - base[t]) * k); }
+  return "rgb(" + mix(r,0) + "," + mix(g,1) + "," + mix(b,2) + ")";
+}
+function nodeFill(n){
+  return darken(nodeColor(n), n.type === "poet" ? 0.5 : 0.26);
+}
+var EDGE_COLORS = {
+  theme:"#4f9db8", imagery:"#6fb894", place:"#b8863e",
+  allusion:"#9670ad", school:"#879dc0", co:"#4a6488", poet:"#c99a52",
+  influence:"#6fd0e4"
+};
+function edgeColor(e){
+  var k = e.kind || (nodeIndex[e.source]||{}).type;
+  return EDGE_COLORS[k] || "#ddd2c2";
+}
+
+var cy = null;
+
+/* ======================= 初始化图谱 ======================= */
+function buildElements(){
+  var els = [];
+  RAW.nodes.forEach(function(n){
+    els.push({data:{
+      id:n.id, label:n.label, type:n.type, period:n.period||"",
+      size:n.size||1, sz:nodeSize(n), color:nodeColor(n), fill:nodeFill(n),
+      tags:(n.tags||[]).join(",")
+    }});
+  });
+  edges.forEach(function(e,i){
+    els.push({data:{
+      id:"e"+i, source:e.source, target:e.target, kind:e.kind,
+      weight:e.weight, color:edgeColor(e),
+      ew:Math.min(6, 0.7 + Math.log((e.weight||1)+1) * 0.62),
+      st:(e.kind==="co"||e.kind==="imagery"||e.kind==="theme"||e.kind==="place"||e.kind==="allusion")?"haystack":"bezier"
+    }});
+  });
+  return els;
+}
+
+function visibleTypes(){
+  var v = VIEWS.filter(function(x){return x.id===ST.view;})[0];
+  var base = v ? v.types : ["poet"];
+  return base.filter(function(t){ return !ST.hiddenTypes[t]; });
+}
+
+function edgeAllowed(e){
+  var a = nodeIndex[e.source], b = nodeIndex[e.target];
+  if(!a || !b) return false;
+  if(e.kind === "co" && ST.view !== "imagery" && ST.view !== "all") return false;
+  if(e.kind === "poet") return a.type === "poet" && b.type === "poet";
+  if(a.type === "poet") return b.type !== "poet";
+  if(b.type === "poet") return a.type !== "poet";
+  return true;
+}
+
+function applyFilter(){
+  var types = visibleTypes();
+  var wanted = {};
+  types.forEach(function(t){ wanted[t] = 1; });
+  var showPoets = {};
+  if(wanted.poet){
+    Object.keys(POETS).forEach(function(p){
+      if(ST.periods.indexOf(POETS[p].period) >= 0 && POETS[p].count >= ST.minPoems) showPoets["p:"+p] = 1;
+    });
+  }
+  // 断代视图下，只保留有足够边缘连接的诗人
+  var visible = {};
+  RAW.nodes.forEach(function(n){
+    if(n.type === "poet"){
+      if(showPoets[n.id]) visible[n.id] = 1;
+    } else if(wanted[n.type]){
+      // 维度节点：仅当至少连接一位可见诗人时显示
+      var has = (adj[n.id]||[]).some(function(x){ return showPoets[x.id]; });
+      if(has) visible[n.id] = 1;
+    }
+  });
+  cy.batch(function(){
+    cy.nodes().forEach(function(n){
+      var on = !!visible[n.id()];
+      n.style("display", on ? "element" : "none");
+    });
+    cy.edges().forEach(function(e){
+      var on = visible[e.data("source")] && visible[e.data("target")] && edgeAllowed(e.data());
+      e.style("display", on ? "element" : "none");
+    });
+  });
+  var shown = cy.nodes(":visible").length;
+  document.getElementById("empty").classList.toggle("on", shown === 0);
+  document.getElementById("hint").textContent = "当前显示 " + shown + " 个节点 · 滚轮缩放 · 点击查看详情";
+  scheduleDeclutter();
+}
+
+/* 均匀螺旋播种：让力导向从一个不扎堆的初始状态开始收敛，
+   避免 cose 随机初始化时偶发的"全挤在中心" */
+function spreadSeed(){
+  var ns = cy.nodes(":visible");
+  var n = ns.length || 1;
+  var golden = Math.PI * (3 - Math.sqrt(5));
+  var R = 320 + Math.sqrt(n) * 46;
+  var order = ns.toArray().sort(function(a,b){
+    return (b.data("sz")||0) - (a.data("sz")||0);
+  });
+  order.forEach(function(nd, i){
+    var r = Math.sqrt((i + 0.65) / n) * R;
+    var a = i * golden;
+    nd.position({ x: Math.cos(a) * r, y: Math.sin(a) * r * 0.94 });
+  });
+}
+
+/* 星云布局：题材居中，诗人按断代分五个扇区，地名/典故/并称居中外环，
+   意象铺最外圈。环带半径按节点数量自适应，用黄金角散开，保证互不压盖。 */
+function nebulaLayout(){
+  var ns = cy.nodes(":visible").toArray();
+  if(!ns.length) return;
+  var g = {};
+  ns.forEach(function(n){
+    var t = n.data("type") || "place";
+    (g[t] = g[t] || []).push(n);
+  });
+  var N = ns.length;
+  var R = 170 + Math.sqrt(N) * 13;          // 367 个节点 → 约 419
+  var portrait = window.matchMedia('(max-width:900px) and (orientation:portrait)').matches;
+  var sx = portrait ? 0.96 : 1.14, sy = portrait ? 1.22 : 0.95;
+  var PHI = 0.6180339887498949;
+
+  function band(list, r0, r1, a0, a1, phase){
+    var n = list.length;
+    if(!n) return;
+    list.sort(function(a,b){ return (b.data("sz")||0) - (a.data("sz")||0); });
+    var span = a1 - a0;
+    list.forEach(function(nd, i){
+      var t = (i + 0.5) / n;
+      var r = Math.sqrt(r0*r0 + t*(r1*r1 - r0*r0));
+      /* 用黄金比小数部分做低差异角度，避免与扇区宽度产生共振条带 */
+      var a = a0 + span * (((i + 0.5) * PHI + phase * 0.11) % 1);
+      nd.position({ x: Math.cos(a) * r * sx, y: Math.sin(a) * r * sy });
+    });
+  }
+
+  // 题材：内圈（17 个，环带要够宽，否则大圆角块会叠在一起）
+  band(g.theme || [], R*0.13, R*0.30, 0, Math.PI*2, 0.7);
+
+  // 诗人：断代五扇区（方位本身携带信息）
+  var periods = PERIODS;
+  var step = Math.PI*2 / periods.length, gap = 0.06;
+  periods.forEach(function(p, k){
+    var list = (g.poet || []).filter(function(n){ return n.data("period") === p; });
+    var a0 = -Math.PI/2 + k*step + gap/2;
+    band(list, R*0.37, R*0.80, a0, a0 + step - gap, k * 0.9);
+  });
+  var restPoets = (g.poet || []).filter(function(n){ return periods.indexOf(n.data("period")) < 0; });
+  band(restPoets, R*0.42, R*0.76, 0, Math.PI*2, 1.3);
+
+  // 中带：地名、并称、典故、影响源
+  band(g.place    || [], R*0.80, R*0.86, 0, Math.PI*2, 0.2);
+  band(g.school   || [], R*0.81, R*0.88, 0, Math.PI*2, 1.1);
+  band(g.allusion || [], R*0.86, R*0.93, 0, Math.PI*2, 1.9);
+  band(g.ext      || [], R*0.93, R*0.97, 0, Math.PI*2, 2.4);
+
+  // 意象：最外圈
+  band(g.imagery  || [], R*0.94, R*1.06, 0, Math.PI*2, 2.8);
+
+  relaxOverlaps(10);
+}
+
+/* 环带只是近似均匀，仍会有个别节点贴在一起。
+   做几轮轻量松弛，把重叠的圆沿连线推开（幅度小，不破坏整体形态）。 */
+function relaxOverlaps(iters){
+  var ns = cy.nodes(":visible").toArray();
+  var pts = ns.map(function(n){
+    return { n:n, x:n.position("x"), y:n.position("y"), r:(n.data("sz")||18)/2 };
+  });
+  var pad = 5;
+  for(var it=0; it<iters; it++){
+    for(var i=0;i<pts.length;i++){
+      var a = pts[i];
+      for(var j=i+1;j<pts.length;j++){
+        var b = pts[j];
+        var dx = b.x - a.x, dy = b.y - a.y;
+        var min = a.r + b.r + pad;
+        var d2 = dx*dx + dy*dy;
+        if(d2 >= min*min || d2 < 1e-4) continue;
+        var d = Math.sqrt(d2);
+        var push = (min - d) * 0.42;
+        var ux = dx/d, uy = dy/d;
+        a.x -= ux*push; a.y -= uy*push;
+        b.x += ux*push; b.y += uy*push;
+      }
+    }
+  }
+  pts.forEach(function(p){ p.n.position({x:p.x, y:p.y}); });
+}
+
+function runLayout(fit){
+  var v = VIEWS.filter(function(x){return x.id===ST.view;})[0];
+  var ideal = v ? v.len : 84;
+  var mob = window.matchMedia("(max-width:900px)").matches;
+  var opt;
+  if(ST.layout === "nebula"){
+    nebulaLayout();
+    opt = {name:"preset", fit:true, padding:40};
+  } else if(ST.layout === "grid"){
+    var byPeriod = {};
+    PERIODS.forEach(function(p,i){ byPeriod[p] = i; });
+    var r = cy.nodes(":visible");
+    var n = r.length || 1;
+    /* 列数按节点数自适应：固定 7 列会让 343 个节点排成 50 行，fit 后小到看不见 */
+    var cols = Math.max(6, Math.ceil(Math.sqrt(n * 1.5)));
+    r.forEach(function(nd,i){
+      var p = nd.data("period");
+      var lane = (p && byPeriod[p] !== undefined) ? byPeriod[p] : 2;
+      nd.position({x:(i % cols) * 46 + lane * 6, y:Math.floor(i / cols) * 46 + lane * 9});
+    });
+    opt = {name:"preset", fit:true, padding:40};
+  } else if(ST.layout === "circle"){
+    /* 原生 circle 把 343 个节点排成一圈，半径必然过大；
+       改成由内向外多圈，圈容量随周长增长 */
+    var list = cy.nodes(":visible").toArray();
+    var gap = 36, rad = 60, idx = 0;
+    while(idx < list.length){
+      var cap = Math.max(8, Math.floor(2 * Math.PI * rad / gap));
+      for(var k=0; k<cap && idx<list.length; k++, idx++){
+        var ang = (k / cap) * Math.PI * 2 - Math.PI/2;
+        list[idx].position({x:Math.cos(ang) * rad, y:Math.sin(ang) * rad});
+      }
+      rad += gap * 1.3;
+    }
+    opt = {name:"preset", fit:true, padding:40};
+  } else if(ST.layout === "concentric"){
+    opt = {name:"concentric", fit:true, padding:40, animate:false,
+           minNodeSpacing:16, avoidOverlap:true,
+           concentric:function(n){
+             if(n.data("type")==="poet") return 3 + Math.log((n.data("size")||1)+1);
+             return 1;
+           },
+           levelWidth:function(){ return 2.2; }};
+  } else {
+    spreadSeed();
+    opt = {name:"fcose", fit:true, padding:38, animate:false, randomize:false,
+           quality:"draft",
+           nodeRepulsion:function(n){ return 9000 + (n.data("sz")||12) * 220; },
+           idealEdgeLength:function(e){ return ideal * (e.data("kind")==="poet" ? 1.7 : 1.15); },
+           edgeElasticity:function(){ return 0.42; },
+           gravity:0.24, numIter:600,
+           nodeSeparation:90,
+           tile:true, packComponents:true,
+           nodeDimensionsIncludeLabels:false,
+           samplingType:true, sampleSize:20,
+           initialTemp:260, coolingFactor:0.95, minTemp:1.2};
+  }
+  cy.layout(opt).run();
+  if(fit){ setTimeout(function(){
+    cy.fit(cy.nodes(":visible"), 46);
+    /* 小屏 fit 后往往小到看不清，给一个最小可读倍率，超出部分靠拖动 */
+    if(mob && ST.layout === "nebula" && cy.zoom() < 0.62){
+      cy.zoom({ level:0.62, renderedPosition:{ x:cy.width()/2, y:cy.height()*0.46 } });
+    }
+    scheduleDeclutter();
+  }, 60); }
+}
+
+/* ======================= 高亮 ======================= */
+function neighborsOf(id){
+  var set = {};
+  set[id] = 1;
+  (adj[id]||[]).forEach(function(x){ set[x.id] = 1; });
+  return set;
+}
+function highlight(id){
+  cy.batch(function(){
+    if(!id){
+      cy.elements().removeClass("faded hl");
+      return;
+    }
+    var nb = neighborsOf(id);
+    cy.nodes().forEach(function(n){
+      if(n.style("display")==="none") return;
+      if(nb[n.id()]) n.removeClass("faded"); else n.addClass("faded");
+      n.toggleClass("hl", n.id() === id);
+    });
+    cy.edges().forEach(function(e){
+      var on = nb[e.data("source")] && nb[e.data("target")];
+      e.toggleClass("hl", on && (e.data("source")===id || e.data("target")===id));
+      e.toggleClass("faded", !on);
+    });
+  });
+}
+
+/* ======================= 详情卡 ======================= */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+
+function bar(label, val, max, color, attrs){
+  var pct = max>0 ? Math.max(2, Math.round(val/max*100)) : 2;
+  return '<div class="bar" '+(attrs||"")+'><span class="lb" title="'+esc(label)+'">'+esc(label)+
+    '</span><span class="track"><i class="fill" style="width:'+pct+'%;background:'+color+'"></i></span>'+
+    '<span class="vv">'+val+'</span></div>';
+}
+function dimChips(list, type){
+  var max = list.length ? list[0].count : 1;
+  return '<div class="dimlegend">' + list.map(function(x){
+    return '<span class="dchip" data-goto="'+type+':'+esc(x.name)+'">'+esc(x.name)+
+      '<span class="w">'+x.count+'</span></span>';
+  }).join("") + '</div>';
+}
+function relRows(list, color){
+  if(!list || !list.length) return '<div style="color:var(--ink-3)">—</div>';
+  var max = list[0].w || 1;
+  return list.map(function(x){
+    var n = nodeIndex[x.id] || {};
+    return '<div class="rel" data-goto="'+esc(x.id)+'"><span class="rn">'+esc(n.label||x.id)+
+      '</span><span class="relbar"><i style="width:'+Math.max(6,Math.round((x.w/max)*100))+'%;background:'+color+'"></i></span>'+
+      '<span class="rw">'+x.w+'</span></div>';
+  }).join("");
+}
+function tagsHtml(tags){
+  return (tags||[]).map(function(t){
+    return '<span class="tag" data-goto="s:'+esc(t)+'">'+esc(t)+'</span>';
+  }).join("");
+}
+
+function renderPoet(name){
+  var p = POETS[name];
+  if(!p){ return; }
+  var life = [];
+  if(p.birth || p.death) life.push((p.birth||"?") + "—" + (p.death||"?"));
+  life.push(p.period);
+  var nb = poetNeighbors[name] || {};
+  var allImagery = (nb.imagery||[]).slice().sort(function(a,b){return b.w-a.w;});
+  var allPlace = (nb.place||[]).slice().sort(function(a,b){return b.w-a.w;});
+  var allAllu = (nb.allusion||[]).slice().sort(function(a,b){return b.w-a.w;});
+  var allTheme = (nb.theme||[]).slice().sort(function(a,b){return b.w-a.w;});
+  var relPoets = (nb.poet||[]).slice().sort(function(a,b){return b.w-a.w;});
+
+  var h = '';
+  h += '<div class="cardhead">';
+  h += '<div class="tname">'+esc(p.name)+'</div>';
+  h += '<div class="meta"><span>'+esc(life.join(" · "))+'</span><span>存诗 '+p.count+' 首</span></div>';
+  h += '<div class="tagrow">'+tagsHtml(p.tags)+'</div>';
+  h += '</div>';
+
+  h += '<div class="quote">'+esc(p.note)+'</div>';
+  if(p.bio){ h += '<div class="bio">'+esc(p.bio)+'</div>'; }
+
+  h += '<div class="bigstat"><b>'+p.count+'</b><span>首 / 图谱收录诗人 '+META.poet_count+' 位中位列第 '+
+       (rankOf(p.count))+'</span></div>';
+
+  if(allTheme.length){
+    h += '<div class="sec"><h3>题材倾向</h3>';
+    var mx = allTheme[0].w;
+    allTheme.slice(0,8).forEach(function(x){
+      var n = nodeIndex[x.id]||{};
+      h += bar(n.label||x.id, x.w, mx, COLORS.theme, 'data-goto="'+esc(x.id)+'"');
+    });
+    h += '</div>';
+  }
+  if(allImagery.length){
+    h += '<div class="sec"><h3>常用意象</h3>'+dimChips(allImagery.slice(0,12).map(function(x){
+      return {name:(nodeIndex[x.id]||{}).label||x.id, count:x.w, id:x.id};}), "i").replace(/data-goto="i:/g,'data-goto="')+'</div>';
+  }
+  if(allPlace.length){
+    h += '<div class="sec"><h3>诗中地理</h3>'+dimChips(allPlace.slice(0,9).map(function(x){
+      return {name:(nodeIndex[x.id]||{}).label||x.id, count:x.w, id:x.id};}), "g").replace(/data-goto="g:/g,'data-goto="')+'</div>';
+  }
+  if(allAllu.length){
+    h += '<div class="sec"><h3>用典</h3>'+dimChips(allAllu.slice(0,8).map(function(x){
+      return {name:(nodeIndex[x.id]||{}).label||x.id, count:x.w, id:x.id};}), "a").replace(/data-goto="a:/g,'data-goto="')+'</div>';
+  }
+  if(relPoets.length){
+    h += '<div class="sec"><h3>诗坛关系</h3>'+relRows(relPoets, COLORS.poet)+'</div>';
+  }
+  if(p.works && p.works.length){
+    h += '<div class="sec"><h3>代表作品</h3>';
+    p.works.forEach(function(w,i){
+      h += '<div class="work'+(i===0?" open":"")+'"><div class="wt">'+esc(w.title)+
+        (w.auto?'<span class="auto">存诗最长者</span>':'')+'</div><div class="wb">'+
+        w.lines.map(function(l){return '<p class="ln">'+esc(l)+'</p>';}).join("")+
+        '<div class="cta">录自《全唐诗》语料</div></div></div>';
+    });
+    h += '</div>';
+  }
+  h += '<div class="cta" style="margin-top:14px">数据由《全唐诗》语料统计生成</div>';
+  setCard(h);
+}
+
+function rankOf(count){
+  var arr = Object.keys(POETS).map(function(k){return POETS[k].count;}).sort(function(a,b){return b-a;});
+  var r = 1; for(var i=0;i<arr.length;i++){ if(arr[i] > count) r++; else break; }
+  return r;
+}
+
+function renderDim(type, id){
+  var n = nodeIndex[type+":"+id];
+  if(!n) return;
+  var list = (adj[type+":"+id]||[]).filter(function(x){ return x.id.indexOf("p:")===0; })
+             .sort(function(a,b){ return b.w-a.w; });
+  var h = '';
+  h += '<div class="cardhead">';
+  h += '<div class="tname">'+esc(n.label)+'</div>';
+  h += '<div class="meta"><span>'+(TYPE_NAMES[type]||type)+'</span>'+
+       (n.region ? '<span>'+esc(n.region)+'</span>' : '')+
+       (n.cat ? '<span>'+esc(n.cat)+'</span>' : '')+
+       '<span>关联诗人 '+list.length+' 位</span></div>';
+  h += '</div>';
+  if(n.desc){ h += '<div class="quote">'+esc(n.desc)+'</div>'; }
+  if(n.src){ h += '<dl class="kv"><dt>典故出处</dt><dd>'+esc(n.src)+'</dd></dl>'; }
+  if(list.length){
+    var mx = list[0].w;
+    h += '<div class="sec"><h3>最常使用此'+(TYPE_NAMES[type]||"")+'的诗人</h3>';
+    list.slice(0,16).forEach(function(x){
+      var pn = nodeIndex[x.id]||{};
+      h += bar(pn.label||x.id.slice(2), x.w, mx, n.color || COLORS[type], 'data-goto="'+esc(x.id)+'"');
+    });
+    h += '</div>';
+    h += '<div class="sec"><h3>共现'+(type==="imagery"?"意象":"关联")+'</h3>';
+    var co = (adj[type+":"+id]||[]).filter(function(x){
+      var m = nodeIndex[x.id]; return m && m.type !== "poet";
+    }).sort(function(a,b){return b.w-a.w;}).slice(0,10);
+    h += co.length ? relRows(co, n.color || COLORS[type]) : '<div style="color:var(--ink-3)">—</div>';
+    h += '</div>';
+  }
+  h += '<div class="cta" style="margin-top:14px">由语料关键词统计生成，或有个别误判</div>';
+  setCard(h);
+}
+
+function renderSchool(name){
+  var n = nodeIndex["s:"+name];
+  if(!n) return;
+  var members = (adj["s:"+name]||[]).map(function(x){return nodeIndex[x.id];})
+                .filter(function(m){return m && m.type==="poet";});
+  members.sort(function(a,b){ return (b.size||0)-(a.size||0); });
+  var h = '';
+  h += '<div class="cardhead"><div class="tname">'+esc(name)+'</div>'+
+       '<div class="meta"><span>并称 / 流派</span><span>成员 '+members.length+' 位</span></div></div>';
+  h += '<div class="quote">'+(n.desc?esc(n.desc):"以「"+esc(name)+"」并称的诗人群体。")+'</div>';
+  var mx = members.length ? members[0].size : 1;
+  h += '<div class="sec"><h3>成员（按存诗量）</h3>';
+  members.forEach(function(m){
+    h += bar(m.label, m.size, mx, PERIOD_COLORS[m.period]||COLORS.poet, 'data-goto="'+esc(m.id)+'"');
+  });
+  h += '</div>';
+  h += '<div class="sec"><h3>时代</h3><div class="dimlegend">'+
+       members.map(function(m){return '<span class="dchip">'+esc(m.label)+
+         '<span class="w">'+esc(m.period)+'</span></span>';}).join("")+'</div></div>';
+  setCard(h);
+}
+
+function renderExt(name){
+  var n = nodeIndex["x:"+name];
+  if(!n) return;
+  // 找到该影响源连接到的所有入选诗人
+  var nbs = (adj["x:"+name]||[]).map(function(x){return nodeIndex[x.id];})
+            .filter(function(m){return m && m.type==="poet";});
+  nbs.sort(function(a,b){ return (b.size||0)-(a.size||0); });
+  var h = '';
+  h += '<div class="cardhead"><div class="tname">'+esc(name)+'</div>'+
+       '<div class="meta"><span>'+esc(n.era||"")+' · '+esc(n.role||"影响源")+'</span>'+
+       '<span>影响 '+nbs.length+' 位诗人</span></div></div>';
+  h += '<div class="quote">'+esc(n.desc||"")+'</div>';
+  h += '<div class="bio" style="font-style:italic">不在 155 位入选诗人之列，作为「影响源」节点呈现其诗坛脉络。</div>';
+  if(nbs.length){
+    var mx = nbs[0].size;
+    h += '<div class="sec"><h3>受影响诗人</h3>';
+    nbs.forEach(function(m){
+      h += bar(m.label, m.size, mx, PERIOD_COLORS[m.period]||COLORS.poet, 'data-goto="'+esc(m.id)+'"');
+    });
+    h += '</div>';
+  }
+  h += '<div class="cta" style="margin-top:14px">唐诗的远祖、同道与后世回响——以此节点串联诗坛影响史</div>';
+  setCard(h);
+}
+
+function setCard(html){
+  var c = document.getElementById("card");
+  c.innerHTML = html;
+  c.scrollTop = 0;
+  c.parentNode.scrollTop = 0;
+}
+
+/* ======================= 选中 ======================= */
+function select(id, focus){
+  ST.selected = id;
+  // 移动端：选中即弹出底部详情卡，取消选中则收起
+  if(window.matchMedia("(max-width:900px)").matches){
+    document.body.classList.toggle("card-open", !!id);
+    if(id) document.body.classList.remove("filter-open");
+  }
+  if(!id){ setCard('<div class="placeholder"><span class="ic">卷</span>点击图谱中的任一节点<br>查看诗人、意象、地名与典故的详情</div>'); highlight(null); return; }
+  var n = nodeIndex[id];
+  if(!n) return;
+  if(n.type === "poet") renderPoet(n.label);
+  else if(n.type === "school") renderSchool(n.label);
+  else if(n.type === "ext") renderExt(n.label);
+  else renderDim(n.type, n.label);
+  highlight(id);
+  if(focus && cy.getElementById(id).style("display") !== "none"){
+    cy.animate({center:{eles:cy.getElementById(id)}, zoom:Math.max(cy.zoom(),0.85)}, {duration:420});
+  }
+}
+
+/* ======================= UI 构建 ======================= */
+function headChips(){
+  var items = [
+    ["诗作", META.total_poems], ["诗人", META.poet_count],
+    ["题材", countType("theme")], ["意象", countType("imagery")],
+    ["地名", countType("place")], ["典故", countType("allusion")],
+    ["关联", META.edge_count]
+  ];
+  document.getElementById("headchips").innerHTML = items.map(function(x){
+    return '<span class="chip">'+x[0]+'<b>'+(x[1]||0).toLocaleString()+'</b></span>';
+  }).join("");
+}
+function countType(t){ return RAW.nodes.filter(function(n){return n.type===t;}).length; }
+
+function buildViews(){
+  document.getElementById("views").innerHTML = VIEWS.map(function(v){
+    return '<button class="vbtn'+(v.id===ST.view?" on":"")+'" data-view="'+v.id+'">'+v.label+'</button>';
+  }).join("");
+}
+function buildTools(){
+  document.getElementById("tools").innerHTML =
+    LAYOUTS.map(function(l){
+      return '<button class="tool'+(l.id===ST.layout?" on":"")+'" data-layout="'+l.id+'">'+l.label+'</button>';
+    }).join("") +
+    '<button class="tool" id="fitbtn">适应窗口</button>' +
+    '<button class="tool" id="zoomin">＋</button>' +
+    '<button class="tool" id="zoomout">－</button>';
+}
+function buildPeriods(){
+  document.getElementById("periods").innerHTML = PERIODS.map(function(p){
+    var on = ST.periods.indexOf(p) >= 0;
+    return '<button class="pbtn'+(on?" on":"")+'" data-period="'+p+'">'+
+      '<span class="sw" style="background:'+PERIOD_COLORS[p]+'"></span>'+p+'</button>';
+  }).join("");
+}
+function buildLegend(){
+  var rows = ["poet","theme","imagery","place","allusion","school","ext"].map(function(t){
+    var cnt = t==="poet" ? META.poet_count : countType(t);
+    return '<div class="legendrow'+(ST.hiddenTypes[t]?" off":"")+'" data-type="'+t+'">'+
+      '<span class="sw" style="background:'+COLORS[t]+'"></span>'+TYPE_NAMES[t]+
+      '<span class="cnt">'+cnt+'</span></div>';
+  }).join("");
+  document.getElementById("legendrows").innerHTML = rows;
+  document.getElementById("legendbox").innerHTML = rows;
+}
+function buildStats(){
+  var mk = function(list, color, gotoPrefix){
+    var mx = list.length ? list[0].count : 1;
+    return list.map(function(x){
+      var attrs = gotoPrefix ? 'data-goto="'+gotoPrefix+x.name+'"' : '';
+      return bar(x.name, x.count, mx, color, attrs);
+    }).join("");
+  };
+  document.getElementById("statpoets").innerHTML = mk(META.top_poets.slice(0,12), COLORS.poet, "p:");
+  document.getElementById("statimagery").innerHTML = mk(META.top_imagery.slice(0,12), COLORS.imagery, "i:");
+  document.getElementById("statplaces").innerHTML = mk(META.top_places.slice(0,12), COLORS.place, "g:");
+  document.getElementById("statschools").innerHTML = (META.schools||[]).slice(0,14).map(function(s){
+    return '<span class="dchip" data-goto="s:'+esc(s.name)+'">'+esc(s.name)+
+      '<span class="w">'+s.count+'</span></span>';
+  }).join("");
+  document.getElementById("a-poems").textContent = (META.total_poems||0).toLocaleString();
+  document.getElementById("a-authors").textContent = (META.total_authors||0).toLocaleString();
+  document.getElementById("a-poets").textContent = META.poet_count;
+  document.getElementById("a-famous").textContent = (META.famous_total||0).toLocaleString();
+}
+
+/* ======================= 搜索 ======================= */
+var searchable = RAW.nodes.map(function(n){
+  return {id:n.id, label:n.label, type:n.type, size:n.size||0,
+          key:(n.label + " " + (n.tags||[]).join("")).toLowerCase()};
+});
+function doSearch(q){
+  var box = document.getElementById("results");
+  q = (q||"").trim().toLowerCase();
+  ST.query = q;
+  if(!q){ box.classList.remove("on"); cy.elements().removeClass("faded"); return; }
+  var hits = searchable.filter(function(n){ return n.key.indexOf(q) >= 0; })
+    .sort(function(a,b){
+      var ap = a.label.toLowerCase()===q ? 0 : (a.label.toLowerCase().indexOf(q)===0?1:2);
+      var bp = b.label.toLowerCase()===q ? 0 : (b.label.toLowerCase().indexOf(q)===0?1:2);
+      if(ap!==bp) return ap-bp;
+      return b.size-a.size;
+    }).slice(0,26);
+  if(!hits.length){ box.innerHTML = '<div class="empty">未找到匹配项</div>'; box.classList.add("on"); return; }
+  box.innerHTML = hits.map(function(h){
+    return '<div class="row" data-goto="'+esc(h.id)+'"><span class="dot" style="background:'+
+      (h.type==="poet" ? (PERIOD_COLORS[(POETS[h.label]||{}).period]||COLORS.poet) : (COLORS[h.type]||"#999"))+
+      '"></span><span class="nm">'+esc(h.label)+'</span><span class="tp">'+TYPE_NAMES[h.type]+'</span></div>';
+  }).join("");
+  box.classList.add("on");
+  // 高亮匹配节点
+  var ids = {}; hits.forEach(function(h){ ids[h.id] = 1; });
+  cy.batch(function(){
+    cy.nodes().forEach(function(n){
+      if(n.style("display")==="none") return;
+      if(ids[n.id()]) n.removeClass("faded"); else n.addClass("faded");
+    });
+  });
+}
+
+/* ======================= 事件 ======================= */
+function bind(){
+  document.body.addEventListener("click", function(ev){
+    var tr = ev.target.closest("[data-goto]");
+    if(tr){
+      var id = tr.getAttribute("data-goto");
+      // 若目标处于隐藏状态，先放宽筛选
+      var n = nodeIndex[id];
+      if(n){
+        if(n.type === "poet"){
+          if(ST.periods.indexOf(n.period) < 0){ ST.periods.push(n.period); buildPeriods(); }
+          if(POETS[n.label] && POETS[n.label].count < ST.minPoems){ ST.minPoems = 0; }
+        }
+        if(visibleTypes().indexOf(n.type) < 0){
+          ST.hiddenTypes[n.type] = false;
+          if(VIEWS.filter(function(v){return v.id===ST.view;})[0].types.indexOf(n.type) < 0){
+            ST.view = "all"; buildViews();
+          }
+          buildLegend();
+        }
+        applyFilter();
+        select(id, true);
+      }
+      document.getElementById("results").classList.remove("on");
+      return;
+    }
+    if(!ev.target.closest(".searchbox")) document.getElementById("results").classList.remove("on");
+    var w = ev.target.closest(".wt");
+    if(w){ w.parentNode.classList.toggle("open"); }
+    var vb = ev.target.closest("[data-view]");
+    if(vb){ ST.view = vb.getAttribute("data-view"); buildViews(); syncToolsForView(); applyFilter(); runLayout(true); }
+    var lb = ev.target.closest("[data-layout]");
+    if(lb){ ST.layout = lb.getAttribute("data-layout"); buildTools(); runLayout(true); }
+    var pb = ev.target.closest("[data-period]");
+    if(pb){
+      var p = pb.getAttribute("data-period"), i = ST.periods.indexOf(p);
+      if(i >= 0){ if(ST.periods.length > 1) ST.periods.splice(i,1); } else ST.periods.push(p);
+      buildPeriods(); applyFilter();
+    }
+    var lg = ev.target.closest("[data-type]");
+    if(lg){
+      var t = lg.getAttribute("data-type");
+      ST.hiddenTypes[t] = !ST.hiddenTypes[t];
+      buildLegend(); applyFilter();
+    }
+  });
+
+  document.getElementById("fitbtn").addEventListener("click", function(){ cy.fit(cy.nodes(":visible"), 46); });
+  document.getElementById("zoomin").addEventListener("click", function(){ cy.zoom({level:cy.zoom()*1.28, renderedPosition:{x:cy.width()/2,y:cy.height()/2}}); });
+  document.getElementById("zoomout").addEventListener("click", function(){ cy.zoom({level:cy.zoom()*0.78, renderedPosition:{x:cy.width()/2,y:cy.height()/2}}); });
+  document.getElementById("resetbtn").addEventListener("click", function(){
+    ST.view="all"; ST.layout="nebula"; ST.periods=PERIODS.slice(); ST.hiddenTypes={}; ST.minPoems=0;
+    buildViews(); buildTools(); buildPeriods(); buildLegend(); applyFilter(); runLayout(true); select(null);
+  });
+  document.getElementById("aboutbtn").addEventListener("click", function(){ document.getElementById("about").classList.add("on"); });
+  document.getElementById("aboutclose").addEventListener("click", function(){ document.getElementById("about").classList.remove("on"); });
+  document.getElementById("about").addEventListener("click", function(e){
+    if(e.target.id === "about") document.getElementById("about").classList.remove("on"); });
+
+  var q = document.getElementById("q");
+  q.addEventListener("input", function(){ doSearch(q.value); });
+  q.addEventListener("focus", function(){ if(q.value) doSearch(q.value); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && document.activeElement !== q){ e.preventDefault(); q.focus(); }
+    if(e.key === "Escape"){ q.value=""; doSearch(""); q.blur();
+      document.getElementById("about").classList.remove("on"); }
+  });
+  window.addEventListener("resize", function(){ if(cy) cy.resize(); });
+}
+function syncToolsForView(){
+  if(ST.view === "era" && ST.layout === "cose"){ ST.layout = "grid"; buildTools(); }
+}
+
+/* ======================= 启动 ======================= */
+/* 标签密度：小屏先藏标签，放大后再浮现；恢复桌面时还原 */
+var mobLabels = false;
+function applyLabelDensity(){
+  if(!cy) return;
+  var want = window.matchMedia("(max-width:900px)").matches;
+  if(want === mobLabels) return;
+  mobLabels = want;
+  if(want){
+    /* 小屏：标签交给避让算法挑，阈值别定太高（否则一处字都看不见） */
+    cy.style().selector("node").style({"min-zoomed-font-size":9, "text-max-width":76}).update();
+  } else {
+    cy.style().selector("node").style({"min-zoomed-font-size":8, "text-max-width":96}).update();
+    cy.style().selector('node[type="poet"]').style({"min-zoomed-font-size":7}).update();
+    cy.style().selector('node[type="ext"]').style({"min-zoomed-font-size":7}).update();
+  }
+  scheduleDeclutter();
+}
+
+/* ======================= 标签避让 =======================
+   密集区里中文标签最容易糊成一片。按节点重要度排序，
+   逐个"占位"：与已放置的标签或大节点相撞的，就把文字隐去；
+   放大后空间够了会自动重新浮现。 */
+var _declTimer = null;
+function scheduleDeclutter(){
+  if(_declTimer) clearTimeout(_declTimer);
+  _declTimer = setTimeout(declutterLabels, 110);
+}
+
+function declutterLabels(){
+  if(!cy) return;
+  var mob = window.matchMedia("(max-width:900px)").matches;
+  var base = mob ? 13 : 14.5;
+  var z = cy.zoom();
+  var cw = cy.width(), ch = cy.height();
+  var nodes = cy.nodes(":visible").toArray();
+
+  var circles = [];
+  nodes.forEach(function(n){
+    var r = Math.max(n.renderedWidth(), n.renderedHeight()) / 2;
+    if(r >= 8) circles.push({id:n.id(), x:n.renderedPosition().x,
+                             y:n.renderedPosition().y, r:r * 0.9});
+  });
+
+  var rank = {poet:0, theme:1, school:1, imagery:2, ext:2, place:2, allusion:3};
+  nodes.sort(function(a,b){
+    var ra = rank[a.data("type")], rb = rank[b.data("type")];
+    if(ra === undefined) ra = 4; if(rb === undefined) rb = 4;
+    if(ra !== rb) return ra - rb;
+    return (b.data("sz")||0) - (a.data("sz")||0);
+  });
+
+  function hitBox(b, list){
+    for(var i=list.length-1;i>=0;i--){
+      var o = list[i];
+      if(!(b.x2 < o.x1 || b.x1 > o.x2 || b.y2 < o.y1 || b.y1 > o.y2)) return true;
+    }
+    return false;
+  }
+  function hitCircle(b, selfId){
+    for(var i=circles.length-1;i>=0;i--){
+      var c = circles[i];
+      if(c.id === selfId) continue;
+      var nx = Math.max(b.x1, Math.min(c.x, b.x2));
+      var ny = Math.max(b.y1, Math.min(c.y, b.y2));
+      var dx = c.x - nx, dy = c.y - ny;
+      if(dx*dx + dy*dy < c.r*c.r) return true;
+    }
+    return false;
+  }
+
+  var boxes = [], show = [], hide = [];
+  nodes.forEach(function(n){
+    var fs = (n.data("type") === "poet" ? base + 1 : base);
+    if(fs * z < 8.5){ hide.push(n); return; }
+    var p = n.renderedPosition();
+    var txt = String(n.data("label") || "");
+    var tw = Math.min(txt.length * fs, 96) * z + 14;
+    var th = fs * 1.45 * z + 6;
+    var nh = Math.max(n.renderedHeight(), n.renderedWidth()) / 2;
+    var cx = p.x, cc = p.y + nh + 4 * z + th / 2;
+    var b = {x1:cx - tw/2, x2:cx + tw/2, y1:cc - th/2, y2:cc + th/2};
+    var out = b.x1 < 2 || b.x2 > cw - 2 || b.y2 > ch - 2;
+    if(out || hitBox(b, boxes) || hitCircle(b, n.id())){
+      hide.push(n);
+    } else {
+      boxes.push(b); show.push(n);
+    }
+  });
+
+  cy.batch(function(){
+    for(var i=0;i<hide.length;i++) hide[i].addClass("nolabel");
+    for(var j=0;j<show.length;j++) show[j].removeClass("nolabel");
+  });
+}
+
+function boot(){
+  headChips(); buildViews(); buildTools(); buildPeriods(); buildLegend(); buildStats(); bind();
+
+  // === 星尘背景 — 长安夜空的星月 ===
+  paintStars();
+
+  cy = cytoscape({
+    container:document.getElementById("cy"),
+    elements:buildElements(),
+    wheelSensitivity:0.22,
+    hideEdgesOnViewport:false,
+    textureOnViewport:false,
+    motionBlur:false,
+    pixelRatio:"auto",
+    minZoom:0.08, maxZoom:3.2,
+    style:[
+      {selector:"node", style:{
+        "background-color":"data(fill)",
+        "width":"data(sz)","height":"data(sz)",
+        "label":"data(label)",
+        "font-family":"Songti SC, STSong, serif",
+        "font-size":14.5,
+        "color":"#f0d896",
+        "text-valign":"bottom","text-halign":"center",
+        "text-margin-y":4,
+        "text-outline-color":"rgba(4,8,15,.96)",
+        "text-outline-width":2.6,
+        "text-background-color":"#050b14",
+        "text-background-opacity":.78,
+        "text-background-padding":2,
+        "text-background-shape":"roundrectangle",
+        "text-max-width":96,
+        "text-wrap":"ellipsis",
+        "text-overflow-wrap":"anywhere",
+        "min-zoomed-font-size":9,
+        "border-width":1.3,
+        "border-color":"data(color)",
+        "border-opacity":.85,
+        "transition-property":"opacity, text-opacity",
+        "transition-duration":"140ms",
+        "overlay-opacity":0,
+        "glow-blur":7,
+        "glow-color":"data(color)",
+        "glow-opacity":.45
+      }},
+      {selector:'node[type="poet"]', style:{
+        "font-size":15.5,"font-weight":600,"color":"#f6dba0",
+        "border-width":1.7,"border-opacity":.95,
+        "min-zoomed-font-size":7,
+        "glow-blur":12,"glow-opacity":.65
+      }},
+      {selector:'node[type="theme"]', style:{"shape":"round-rectangle","font-size":15,"color":"#aed8e6"}},
+      {selector:'node[type="imagery"]', style:{"shape":"diamond","font-size":14,"color":"#c8e6d4"}},
+      {selector:'node[type="place"]', style:{"shape":"hexagon","font-size":14,"color":"#e8c89a"}},
+      {selector:'node[type="allusion"]', style:{"shape":"triangle","font-size":14,"color":"#e0bce6"}},
+      {selector:'node[type="school"]', style:{
+        "shape":"pentagon","font-size":13.5,"color":"#c0d0e4",
+        "border-width":1.8,"border-style":"dashed"}},
+      {selector:'node[type="ext"]', style:{
+        "shape":"ellipse","font-size":13.5,"font-style":"italic",
+        "color":"#a8e8f0",
+        "border-width":1.6,"border-style":"dashed",
+        "text-valign":"center","text-halign":"center","text-margin-y":0,
+        "min-zoomed-font-size":7,
+        "glow-opacity":.8}},
+      {selector:"node.hl", style:{"border-width":3.2,"border-color":"#fff2c2","border-opacity":1,
+        "z-index":999,"glow-blur":22,"glow-opacity":1,"glow-color":"#f6dba0"}},
+      {selector:"node.faded", style:{"opacity":.16,"text-opacity":.06,
+        "glow-opacity":.03}},
+      {selector:"edge", style:{
+        "curve-style":"bezier","width":"data(ew)","line-color":"data(color)",
+        "opacity":.14,"overlay-opacity":0,"transition-property":"opacity",
+        "glow-blur":4,"glow-color":"data(color)","glow-opacity":.12
+      }},
+      {selector:'edge[kind="co"]', style:{"line-style":"dashed","opacity":.2}},
+      {selector:'edge[kind="influence"]', style:{"line-style":"dashed","opacity":.5,
+        "target-arrow-shape":"triangle","arrow-scale":.9,
+        "curve-style":"bezier","glow-opacity":.5}},
+      {selector:"edge.hl", style:{"opacity":1,"z-index":50,"line-color":"#f6dba0",
+        "width":2.4,"glow-blur":10,"glow-color":"#e8c47a","glow-opacity":.8}},
+      {selector:"edge.faded", style:{"opacity":.04}},
+      /* 标签避让：与更重要的标签冲突时隐去，放大后自动重算 */
+      {selector:"node.nolabel", style:{"text-opacity":0}}
+    ]
+  });
+
+  // 移动端：整图缩到小屏时先只显示点位，放大后再浮出标签（避免糊成一团）
+  applyLabelDensity();
+
+  cy.on("tap","node", function(ev){ select(ev.target.id(), false); });
+  /* 手指/鼠标落在节点旁边也能选中：取点击点附近最近的可见节点。
+     小屏上节点渲染只有几像素，这一步实质上是把热区放大到 16px。 */
+  cy.on("tap", function(ev){
+    var t = ev.target;
+    /* 只有真正点在节点上才交给节点自己的 handler；
+       落在连线或空白处时，都去找点击点附近最近的节点 */
+    if(t && t.isNode && t.isNode()) return;
+    var p = ev.renderedPosition || ev.position;
+    if(!p) return;
+    var best = null, bestD = Infinity;
+    cy.nodes(":visible").forEach(function(n){
+      var q = n.renderedPosition();
+      var dx = q.x - p.x, dy = q.y - p.y;
+      var d = Math.sqrt(dx*dx + dy*dy);
+      var r = Math.max(n.renderedWidth(), n.renderedHeight())/2 + 20;
+      if(d <= r && d < bestD){ bestD = d; best = n; }
+    });
+    if(best){
+      select(best.id(), false);
+      if(window.matchMedia("(max-width:900px)").matches === false) cy.animate({center:{eles:best}}, {duration:260});
+    }
+  });
+  cy.on("zoom", scheduleDeclutter);
+  cy.on("layoutstop", scheduleDeclutter);
+  cy.on("dbltap", function(ev){ if(ev.target === cy){ select(null); cy.fit(cy.nodes(":visible"),46); } });
+  cy.on("mouseover","node", function(ev){ document.body.style.cursor = "pointer"; });
+  cy.on("mouseout","node", function(){ document.body.style.cursor = "default"; });
+
+  applyFilter();
+  runLayout(true);
+  setTimeout(function(){ document.getElementById("loading").classList.add("off"); scheduleDeclutter(); }, 320);
+}
+
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+
+/* ======================= 移动端交互 ======================= */
+(function(){
+  var body = document.body;
+  var mask = document.getElementById("mask");
+  var fb = document.getElementById("filterbtn");
+  var sc = document.getElementById("sheetclose");
+  var MOB = window.matchMedia("(max-width:900px)");
+
+  function closeFilter(){ body.classList.remove("filter-open"); }
+  function closeCard(){ body.classList.remove("card-open"); }
+
+  if(fb) fb.addEventListener("click", function(){
+    closeCard();
+    body.classList.toggle("filter-open");
+  });
+  if(sc) sc.addEventListener("click", closeCard);
+  if(mask) mask.addEventListener("click", function(){ closeFilter(); closeCard(); });
+
+  // 旋转屏幕 / 切换尺寸后重排画布
+  function relayout(){
+    if(!cy) return;
+    applyLabelDensity();
+    cy.resize();
+    cy.fit(cy.nodes(":visible"), MOB.matches ? 26 : 46);
+    if(MOB.matches && ST.layout === "nebula" && cy.zoom() < 0.62){
+      cy.zoom({ level:0.62, renderedPosition:{ x:cy.width()/2, y:cy.height()*0.46 } });
+    }
+    scheduleDeclutter();
+  }
+  window.addEventListener("orientationchange", function(){ setTimeout(relayout, 280); });
+
+  // 视口尺寸变化（含桌面窗口缩放 / 手机横竖屏切换）后重排
+  var lastW = window.innerWidth, lastH = window.innerHeight, rt = null;
+  window.addEventListener("resize", function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){
+      if(Math.abs(window.innerWidth - lastW) < 40 && Math.abs(window.innerHeight - lastH) < 40) return;
+      lastW = window.innerWidth; lastH = window.innerHeight;
+      relayout();
+    }, 220);
+  });
+
+  if(MOB.addEventListener){
+    MOB.addEventListener("change", function(e){
+      if(!e.matches){ closeFilter(); closeCard(); }
+      setTimeout(relayout, 120);
+    });
+  }
+})();
+
+/* ======================= 星尘背景 ======================= */
+function paintStars(){
+  var stage = document.getElementById("stage");
+  if(!stage) return;
+  var canvas = document.createElement("canvas");
+  canvas.id = "stars";
+  canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;";
+  stage.insertBefore(canvas, stage.firstChild);
+  var ctx = canvas.getContext("2d");
+  var W = 0, H = 0, stars = [], meteors = [];
+  function resize(){
+    var r = stage.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = W * devicePixelRatio;
+    canvas.height = H * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    stars = [];
+    meteors = [];
+    var n = Math.floor((W*H)/4500);
+    for(var i=0;i<n;i++){
+      stars.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r:Math.random()*1.1+.3,
+        a:Math.random()*.55+.18,
+        ph:Math.random()*Math.PI*2,
+        sp:Math.random()*.02+.005,
+        hue:Math.random()<.85 ? 246 : (Math.random()<0.5 ? 232 : 196)  // 月白/金
+      });
+    }
+  }
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    // 玄月 — 右上角，月白为主、外泛金晕
+    var mx = W*0.905, my = H*0.11, mr = Math.min(W,H)*.048;
+    var grd = ctx.createRadialGradient(mx,my,mr*.9,mx,my,mr*4.2);
+    grd.addColorStop(0,"rgba(246,231,194,.28)");
+    grd.addColorStop(.3,"rgba(232,196,122,.12)");
+    grd.addColorStop(1,"rgba(232,196,122,0)");
+    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(mx,my,mr*4.2,0,Math.PI*2); ctx.fill();
+    grd = ctx.createRadialGradient(mx,my,mr*.9,mx,my,mr*2.2);
+    grd.addColorStop(0,"rgba(250,242,216,.5)");
+    grd.addColorStop(1,"rgba(240,215,160,0)");
+    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(mx,my,mr*2.2,0,Math.PI*2); ctx.fill();
+    var moonGrd = ctx.createRadialGradient(mx-mr*.22,my-mr*.22,mr*.05,mx,my,mr);
+    moonGrd.addColorStop(0,"#fdf6e0");
+    moonGrd.addColorStop(.55,"#f2e2b4");
+    moonGrd.addColorStop(1,"#c9a763");
+    ctx.fillStyle = moonGrd; ctx.beginPath(); ctx.arc(mx,my,mr,0,Math.PI*2); ctx.fill();
+    // 月面细节 — 极淡的环形山阴影
+    ctx.save();
+    ctx.beginPath(); ctx.arc(mx,my,mr,0,Math.PI*2); ctx.clip();
+    ctx.fillStyle = "rgba(190,160,100,.16)";
+    ctx.beginPath(); ctx.arc(mx-mr*.3,my+mr*.18,mr*.22,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx+mr*.28,my-mr*.3,mr*.15,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx+mr*.1,my+mr*.42,mr*.18,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    // 星点
+    for(var i=0;i<stars.length;i++){
+      var s = stars[i];
+      var tw = .5+.5*Math.sin(t*.001*s.sp+s.ph);
+      var a = s.a * (.55+tw*.45);
+      var col = s.hue===246 ? "246,219,160" : (s.hue===232 ? "232,196,122" : "246,231,194");
+      ctx.fillStyle = "rgba("+col+","+a.toFixed(3)+")";
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r*(.7+tw*.5),0,Math.PI*2); ctx.fill();
+      // 较亮的星画十字光芒
+      if(s.r > .9 && tw > .78){
+        ctx.strokeStyle = "rgba("+col+","+(a*.5)+")";
+        ctx.lineWidth = .6;
+        ctx.beginPath();
+        ctx.moveTo(s.x-s.r*5, s.y); ctx.lineTo(s.x+s.r*5, s.y);
+        ctx.moveTo(s.x, s.y-s.r*5); ctx.lineTo(s.x, s.y+s.r*5);
+        ctx.stroke();
+      }
+    }
+    // 流星 — 偶发
+    if(Math.random() < .012 && meteors.length < 2){
+      meteors.push({x:Math.random()*W*.6, y:Math.random()*H*.3, vx:4+Math.random()*3, vy:2+Math.random()*2,
+                     life:0, max:55+Math.random()*30, hue:Math.random()<.5?"246,219,160":"232,196,122"});
+    }
+    for(var k=meteors.length-1;k>=0;k--){
+      var m = meteors[k]; m.life++; m.x += m.vx; m.y += m.vy;
+      var alpha = (1 - m.life/m.max);
+      ctx.strokeStyle = "rgba("+m.hue+","+alpha.toFixed(3)+")";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y);
+      ctx.lineTo(m.x - m.vx*8, m.y - m.vy*8);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,250,235,"+alpha.toFixed(3)+")";
+      ctx.beginPath(); ctx.arc(m.x,m.y,1.6,0,Math.PI*2); ctx.fill();
+      if(m.life >= m.max) meteors.splice(k,1);
+    }
+    requestAnimationFrame(draw);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+  requestAnimationFrame(draw);
+}
+})();
+</script>
+</body>
+</html>
