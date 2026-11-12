@@ -1,0 +1,25 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="m" cx="38%" cy="34%" r="72%">
+      <stop offset="0" stop-color="#fbeec5"/>
+      <stop offset="45%" stop-color="#e8c47a"/>
+      <stop offset="100%" stop-color="#8a5f24"/>
+    </radialGradient>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="#0a1424"/>
+  <circle cx="19" cy="12" r="7.6" fill="url(#m)"/>
+  <circle cx="22.4" cy="8.6" r="6.4" fill="#0a1424" opacity=".82"/>
+  <circle cx="6.5" cy="6" r="1" fill="#f0d896" opacity=".9"/>
+  <circle cx="9.5" cy="22" r=".8" fill="#f0d896" opacity=".7"/>
+  <circle cx="25" cy="26" r=".9" fill="#f0d896" opacity=".8"/>
+  <circle cx="4" cy="15" r=".7" fill="#7fd8e8" opacity=".85"/>
+  <path d="M0 27 L0 23 L3 23 L3 20 L5 20 L5 17 L7 17 L7 20 L9 20 L9 23 L12 23 L12 20 L15 20 L15 16 L18 16 L18 19 L21 19 L21 22 L24 22 L24 18 L27 18 L27 21 L30 21 L30 25 L32 25 L32 32 L0 32 Z" fill="#040810"/>
+  <g stroke="#b89048" stroke-width=".5" stroke-opacity=".6" fill="none">
+    <path d="M5 20 L5 17 L7 17 L7 20"/>
+    <path d="M15 20 L15 16 L18 16 L18 19"/>
+    <path d="M24 22 L24 18 L27 18 L27 21"/>
+  </g>
+  <circle cx="7" cy="22" r=".9" fill="#f6dba0"/>
+  <circle cx="18" cy="21.5" r=".9" fill="#f6dba0"/>
+  <circle cx="27" cy="23.5" r=".9" fill="#f6dba0"/>
+</svg>
