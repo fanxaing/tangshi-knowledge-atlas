@@ -1,6 +1,7 @@
 name: import-site
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
