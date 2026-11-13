@@ -12,6 +12,16 @@
 <meta property="og:description" content="人物 / 空间 / 主题三层叙事 · 从漫游到共创的完整诗境体验">
 <meta property="og:url" content="https://fanxaing.github.io/tangshi-knowledge-atlas/changan-shijing/">
 <meta property="og:image" content="https://fanxaing.github.io/tangshi-knowledge-atlas/changan-shijing/share.jpg">
+<meta property="og:image:width" content="500">
+<meta property="og:image:height" content="400">
+<meta property="og:image:alt" content="数字诗境长安 · 长安夜色首屏">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="数字诗境长安 · 你不是在参观长安，而是在续写一首诗">
+<meta name="twitter:description" content="人物 / 空间 / 主题三层叙事 · 从漫游到共创的完整诗境体验">
+<meta name="twitter:image" content="https://fanxaing.github.io/tangshi-knowledge-atlas/changan-shijing/share.jpg">
+<link rel="canonical" href="https://fanxaing.github.io/tangshi-knowledge-atlas/changan-shijing/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23080d1f'/><text x='32' y='44' font-size='34' text-anchor='middle' fill='%23e8c476' font-family='Kaiti SC,serif'>%E8%AF%97</text></svg>">
 <meta itemprop="name" content="数字诗境长安">
 <meta itemprop="image" content="https://fanxaing.github.io/tangshi-knowledge-atlas/changan-shijing/share.jpg">
 <script>
@@ -244,15 +254,21 @@ textarea.userline:focus{border-color:var(--gold)}
   box-shadow:0 4px 18px rgba(0,0,0,.45);transition:.2s;
 }
 .music-fab:active{transform:scale(.9)}
-.music-fab i{display:block;width:2.5px;height:5px;border-radius:2px;background:var(--gold-l);opacity:.32;transition:.3s}
+.music-fab i{display:block;width:2.5px;height:15px;border-radius:2px;background:var(--gold-l);opacity:.32;transform:scaleY(.33);transform-origin:bottom;transition:.3s}
 .music-fab.on i{opacity:.95;animation:eq .95s ease-in-out infinite}
 .music-fab.on i:nth-child(2){animation-delay:.16s}
 .music-fab.on i:nth-child(3){animation-delay:.32s}
 .music-fab.on i:nth-child(4){animation-delay:.48s}
 .music-fab.off::after{content:"";position:absolute;width:21px;height:1.5px;border-radius:2px;background:var(--ink-dim);transform:rotate(-45deg)}
-@keyframes eq{0%,100%{height:5px}50%{height:15px}}
+@keyframes eq{0%,100%{transform:scaleY(.33)}50%{transform:scaleY(1)}}
 .music-hint{font-size:11.5px;letter-spacing:2px;color:var(--ink-faint);margin-top:16px}
 .music-hint b{color:var(--gold-l);font-weight:400}
+/* ── 可达性基线（ui-skills）：键盘焦点可见 + 尊重系统"减少动态效果" ── */
+:focus-visible{outline:2px solid rgba(232,196,118,.85);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .gen-poem.appear .pl{opacity:1;filter:none}
+}
 </style>
 </head>
 <body>
@@ -277,12 +293,12 @@ textarea.userline:focus{border-color:var(--gold)}
   <!-- ═══════ 02 数字长安地图 ═══════ -->
   <section class="screen" id="s-map">
     <div class="bg"><img data-img="s02-map" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="go('home')">‹</div><div class="screen-title">数字长安</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="go('home')">‹</div><div class="screen-title">数字长安</div></div>
     <div class="content">
       <div class="layer-tabs" id="layerTabs">
-        <div class="layer-tab on" data-layer="person" onclick="setLayer('person')">人 物</div>
-        <div class="layer-tab" data-layer="space" onclick="setLayer('space')">空 间</div>
-        <div class="layer-tab" data-layer="theme" onclick="setLayer('theme')">主 题</div>
+        <div class="layer-tab on" data-layer="person" role="button" tabindex="0" onclick="setLayer('person')">人 物</div>
+        <div class="layer-tab" data-layer="space" role="button" tabindex="0" onclick="setLayer('space')">空 间</div>
+        <div class="layer-tab" data-layer="theme" role="button" tabindex="0" onclick="setLayer('theme')">主 题</div>
       </div>
       <div class="map-stage" id="mapStage"><img data-img="s02-map" alt=""></div>
       <div class="map-hint" id="mapHint">点击光点 · 进入诗境</div>
@@ -296,7 +312,7 @@ textarea.userline:focus{border-color:var(--gold)}
   <!-- ═══════ 03 人物图谱 ═══════ -->
   <section class="screen" id="s-poets">
     <div class="bg"><img data-img="s03-poets" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="go('map')">‹</div><div class="screen-title">人物图谱</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="go('map')">‹</div><div class="screen-title">人物图谱</div></div>
     <div class="content">
       <div style="text-align:center;margin-bottom:14px">
         <div class="big-sub" style="margin-top:0">选一位诗人 · 走入他的诗境</div>
@@ -308,35 +324,35 @@ textarea.userline:focus{border-color:var(--gold)}
   <!-- ═══════ 04 诗人诗境（李白等） ═══════ -->
   <section class="screen" id="s-poet">
     <div class="bg"><img data-img="s04-libai" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="go('poets')">‹</div><div class="screen-title" id="poetPageTitle">诗境</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="go('poets')">‹</div><div class="screen-title" id="poetPageTitle">诗境</div></div>
     <div class="content" id="poetPageBody"></div>
   </section>
 
   <!-- ═══════ 05 地标诗境（大雁塔等） ═══════ -->
   <section class="screen" id="s-place">
     <div class="bg"><img data-img="s05-dayanta" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="go('map')">‹</div><div class="screen-title" id="placePageTitle">诗境</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="go('map')">‹</div><div class="screen-title" id="placePageTitle">诗境</div></div>
     <div class="content" id="placePageBody"></div>
   </section>
 
   <!-- ═══════ 06 线上诗会 ═══════ -->
   <section class="screen" id="s-shihui">
     <div class="bg"><img data-img="s06-shihui" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="backFromShihui()">‹</div><div class="screen-title">线上诗会</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="backFromShihui()">‹</div><div class="screen-title">线上诗会</div></div>
     <div class="content" id="shihuiBody"></div>
   </section>
 
   <!-- ═══════ 07 与李白共创 ═══════ -->
   <section class="screen" id="s-create">
     <div class="bg"><img data-img="s07-create" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="createBack()">‹</div><div class="screen-title" id="createTitle">与李白共创</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="createBack()">‹</div><div class="screen-title" id="createTitle">与李白共创</div></div>
     <div class="content" id="createBody"></div>
   </section>
 
   <!-- ═══════ 08 作品海报 ═══════ -->
   <section class="screen" id="s-poster">
     <div class="bg"><img data-img="s08-poster" alt=""></div><div class="shade"></div>
-    <div class="topbar"><div class="backbtn" onclick="go('create')">‹</div><div class="screen-title">作品海报</div></div>
+    <div class="topbar"><div class="backbtn" role="button" tabindex="0" aria-label="返回" onclick="go('create')">‹</div><div class="screen-title">作品海报</div></div>
     <div class="content">
       <div class="scrollarea" style="display:flex;flex-direction:column">
         <canvas id="posterCanvas" width="900" height="1600"></canvas>
@@ -354,10 +370,10 @@ textarea.userline:focus{border-color:var(--gold)}
   <div class="sheet-mask" id="sheetMask" onclick="closeSheet()"></div>
   <div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- 长安夜声 开关 -->
-  <div class="music-fab on" id="musicFab" onclick="Music.toggle()" title="长安夜声"><i></i><i></i><i></i><i></i></div>
+  <div class="music-fab on" id="musicFab" role="button" tabindex="0" aria-pressed="true" aria-label="背景音乐 开关" onclick="Music.toggle()" title="长安夜声"><i></i><i></i><i></i><i></i></div>
 </div>
 
 <script>
@@ -493,6 +509,7 @@ function renderHotspots(){
   HOTSPOTS[S.layer].forEach(h=>{
     const el=document.createElement("div");
     el.className="hotspot"+(lit.includes(h.id)?" lit":"");
+    el.setAttribute("role","button"); el.setAttribute("tabindex","0"); el.setAttribute("aria-label",label);
     el.style.left=h.x+"%"; el.style.top=h.y+"%";
     const label = S.layer==="person"?poet(h.id).name : S.layer==="space"?KB.places[h.id]?.name||"长安" : KB.themes.find(t=>t.id===h.id).name;
     el.innerHTML=`<div class="dot"></div><div class="lbl">${label}</div>`;
@@ -511,6 +528,7 @@ function renderPoets(){
   KB.poets.forEach(p=>{
     const c=document.createElement("div");
     c.className="poet-card";
+    c.setAttribute("role","button"); c.setAttribute("tabindex","0"); c.setAttribute("aria-label",p.name+"，"+p.title);
     c.innerHTML=`<div class="p-name">${p.name}</div><div class="p-title">${p.title}</div><div class="p-era">${p.era}</div>`;
     c.onclick=()=>openPoet(p.id);
     g.appendChild(c);
@@ -532,11 +550,11 @@ function openPoet(id){
       <div class="panel" style="padding:14px 16px;margin-bottom:14px">
         <div style="font-size:14.5px;line-height:1.9;color:var(--ink-dim);letter-spacing:1px">${p.intro}</div>
         <div class="hr"></div>
-        <span class="voice-btn" onclick="speak(['${p.name}，${p.title}。','${p.intro}'])"><span class="ic">▶</span> 语音导览</span>
+        <span class="voice-btn" role="button" tabindex="0" onclick="speak(['${p.name}，${p.title}。','${p.intro}'])"><span class="ic">▶</span> 语音导览</span>
       </div>
       <div class="divider-title">代 表 诗 境</div>
       ${poms.slice(0,4).map(x=>`
-        <div class="poem-list-item" onclick="openPoemSheet('${x.id}')">
+        <div class="poem-list-item" role="button" tabindex="0" onclick="openPoemSheet('${x.id}')">
           <div><div class="t">《${x.title}》</div><div class="f">${x.lines[0]} · ${x.form}</div></div>
           <div style="color:var(--gold);font-size:18px">›</div>
         </div>`).join("")}
@@ -563,11 +581,11 @@ function openPlace(id){
       <div class="scroll-panel" style="margin-bottom:14px">
         <div style="font-size:14.5px;line-height:2;color:var(--ink);letter-spacing:1px">${pl.intro}</div>
         <div class="hr"></div>
-        <span class="voice-btn" onclick="speak(['${pl.name}。','${pl.intro}'])"><span class="ic">▶</span> 语音导览</span>
+        <span class="voice-btn" role="button" tabindex="0" onclick="speak(['${pl.name}。','${pl.intro}'])"><span class="ic">▶</span> 语音导览</span>
       </div>
       <div class="divider-title">此 处 诗 篇</div>
       ${poms.map(x=>`
-        <div class="poem-list-item" onclick="openPoemSheet('${x.id}')">
+        <div class="poem-list-item" role="button" tabindex="0" onclick="openPoemSheet('${x.id}')">
           <div><div class="t">《${x.title}》 <span style="font-size:11px;color:var(--ink-faint)">${poet(x.poetId).name}</span></div>
           <div class="f">${x.lines[0]}</div></div>
           <div style="color:var(--gold);font-size:18px">›</div>
@@ -588,7 +606,7 @@ function openTheme(id){
       <div style="margin-top:8px">${t.moods.map(m=>`<span class="tag">${m}</span>`).join("")}</div>
     </div>
     ${poms.map(x=>`
-      <div class="poem-list-item" onclick="openPoemSheet('${x.id}')">
+      <div class="poem-list-item" role="button" tabindex="0" onclick="openPoemSheet('${x.id}')">
         <div><div class="t">《${x.title}》 <span style="font-size:11px;color:var(--ink-faint)">${poet(x.poetId).name}</span></div>
         <div class="f">${x.lines[0]}</div></div>
         <div style="color:var(--gold);font-size:18px">›</div>
@@ -610,7 +628,7 @@ function openPoemSheet(id){
       <div class="poem-src">${x.intro}</div>
     </div>
     <div style="text-align:center;margin:14px 0 4px">
-      <span class="voice-btn" onclick="speak(['${x.title}。','${x.lines.join("','")}'])"><span class="ic">▶</span> 听 诗</span>
+      <span class="voice-btn" role="button" tabindex="0" onclick="speak(['${x.title}。','${x.lines.join("','")}'])"><span class="ic">▶</span> 听 诗</span>
     </div>
     <div class="hr"></div>
     <button class="btn" onclick="startCreateFrom('${id}')">以此诗为素材 · 与${p.name}共创</button>`);
@@ -649,7 +667,7 @@ function renderShihui(){
             <div class="w-author">我 · 借材${w.material||"—"}</div>
             <div class="lamp-btn" onclick="toast('为作品点灯 🏮')">🏮 <span>${w.lamp||1}</span></div>
           </div>
-          <div class="w-poem" style="cursor:pointer" onclick="viewMyWork(${i})">${w.poem.join("，").replace(/，([^，]*)$/,"。$1")}</div>
+          <div class="w-poem" role="button" tabindex="0" style="cursor:pointer" onclick="viewMyWork(${i})">${w.poem.join("，").replace(/，([^，]*)$/,"。$1")}</div>
         </div>`).join(""):""}
       <div class="hintbar">离开景区后，也能随时回来看看别人的长安</div>
     </div>
@@ -706,7 +724,7 @@ function renderCreate(){
       <div class="scrollarea">
         <div class="big-sub" style="margin:4px 0 2px">此刻你看见的长安是什么？</div>
         <div style="font-size:12.5px;color:var(--ink-faint);letter-spacing:2px;margin-bottom:12px">选择 2 – 4 个意象，它们将织入你的诗</div>
-        <div class="chip-row">${IMAGERY.map(m=>`<div class="chip ${c.images.includes(m)?"on":""}" onclick="pickImg('${m}',this)">${m}</div>`).join("")}</div>
+        <div class="chip-row">${IMAGERY.map(m=>`<div class="chip ${c.images.includes(m)?"on":""}" role="button" tabindex="0" onclick="pickImg('${m}',this)">${m}</div>`).join("")}</div>
       </div>
       <div class="hintbar">已选 ${c.images.length}/4</div>
       <button class="btn" style="margin-top:10px" onclick="createNext()">下 一 步 · 选 情 绪 ${c.images.length>=2?"":"（还差 "+(2-c.images.length)+" 个）"}</button>`;
@@ -716,7 +734,7 @@ function renderCreate(){
       <div class="scrollarea">
         <div class="big-sub" style="margin:4px 0 2px">为这句诗选一种情绪</div>
         <div style="font-size:12.5px;color:var(--ink-faint);letter-spacing:2px;margin-bottom:12px">你的情绪会决定诗的走向</div>
-        <div class="chip-row">${MOODS.map(m=>`<div class="chip ${c.mood===m?"on":""}" onclick="pickMood('${m}')">${m}</div>`).join("")}</div>
+        <div class="chip-row">${MOODS.map(m=>`<div class="chip ${c.mood===m?"on":""}" role="button" tabindex="0" onclick="pickMood('${m}')">${m}</div>`).join("")}</div>
       </div>
       <button class="btn" style="margin-top:10px" ${c.mood?"":"disabled"} onclick="createNext()">下 一 步 · 选 素 材</button>`;
   }else{
@@ -726,7 +744,7 @@ function renderCreate(){
         <div class="big-sub" style="margin:4px 0 2px">借一句唐诗，开始你的创作</div>
         <div style="font-size:12.5px;color:var(--ink-faint);letter-spacing:2px;margin-bottom:12px">诗句会作为题记出现在你的海报上</div>
         ${MATERIALS.map((m,i)=>`
-          <div class="poem-list-item" onclick="pickMaterial(${i})">
+          <div class="poem-list-item" role="button" tabindex="0" onclick="pickMaterial(${i})">
             <div><div class="t">「${m.line}」</div><div class="f">${m.from}</div></div>
             <div style="color:var(--gold);font-size:18px">${c.material&&c.material.startsWith(m.line)?"✓":"›"}</div>
           </div>`).join("")}
@@ -777,7 +795,7 @@ function renderPoemResult(){
         <div class="poem-src" style="margin-top:12px">题记：${c.material||""}</div>
       </div>
       <div class="gen-tools">
-        <span class="voice-btn" onclick="speak(['${c.poem.join("','")}'])"><span class="ic">▶</span> 听我读</span>
+        <span class="voice-btn" role="button" tabindex="0" onclick="speak(['${c.poem.join("','")}'])"><span class="ic">▶</span> 听我读</span>
       </div>
       <div class="gen-tools" style="margin-top:14px">
         <button class="btn ghost small" onclick="remake()">换一句</button>
@@ -1224,6 +1242,15 @@ document.addEventListener("click",e=>{
   if(t.closest(".backbtn")){ Music.sfx("back"); return; }
   if(t.closest(".btn,.layer-tab,.hotspot,.poet-card,.chip,.work-card,.voice-btn,.sheet-item")) Music.sfx("tap");
 },{passive:true});
+
+/* ── 键盘访问：Enter/Space 触发 role="button"，Esc 关面板并停止朗读 ── */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ closeSheet(); return; }
+  const t=e.target;
+  if((e.key==="Enter"||e.key===" ")&&t&&t.matches&&t.matches('[role="button"]')){
+    e.preventDefault(); t.click();
+  }
+});
 
 /* ═════════════ 启动 ═════════════ */
 renderHotspots();
