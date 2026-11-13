@@ -38,6 +38,15 @@
   };
   var timer = setInterval(kill, 120);
 })();
+/* ── 兜底诊断：任何脚本错误直接显示在屏幕顶部（仅异常时可见） ── */
+window.addEventListener("error",function(e){
+  try{
+    var d=document.createElement("div");
+    d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#7a1f1f;color:#fff;font:12px/1.5 monospace;padding:8px 10px;word-break:break-all";
+    d.textContent="脚本错误: "+(e.message||"未知")+" @ 行 "+(e.lineno||"?");
+    (document.body||document.documentElement).appendChild(d);
+  }catch(_){}
+});
 </script>
 <style>
 :root{
@@ -477,7 +486,7 @@ const $ = s=>document.querySelector(s);
 const poet = id=>KB.poets.find(p=>p.id===id);
 const poem = id=>KB.poems.find(p=>p.id===id);
 function store(k,v){ try{localStorage.setItem(k,JSON.stringify(v))}catch(e){} }
-function load(k,d){ try{return JSON.parse(localStorage.getItem(k)) ?? d}catch(e){return d} }
+function load(k,d){ try{const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v}catch(e){return d} }
 
 /* ═════════════ 路由 ═════════════ */
 function go(name){
@@ -509,9 +518,9 @@ function renderHotspots(){
   HOTSPOTS[S.layer].forEach(h=>{
     const el=document.createElement("div");
     el.className="hotspot"+(lit.includes(h.id)?" lit":"");
+    const label = S.layer==="person"?poet(h.id).name : S.layer==="space"?((KB.places[h.id]&&KB.places[h.id].name)||"长安") : KB.themes.find(t=>t.id===h.id).name;
     el.setAttribute("role","button"); el.setAttribute("tabindex","0"); el.setAttribute("aria-label",label);
     el.style.left=h.x+"%"; el.style.top=h.y+"%";
-    const label = S.layer==="person"?poet(h.id).name : S.layer==="space"?KB.places[h.id]?.name||"长安" : KB.themes.find(t=>t.id===h.id).name;
     el.innerHTML=`<div class="dot"></div><div class="lbl">${label}</div>`;
     el.onclick=()=>{
       if(S.layer==="person") openPoet(h.id);
@@ -896,7 +905,7 @@ function lightLandmark(){
   const lit=load("litLandmarks",[]);
   const target=S.placeId||"dayanta";
   if(!lit.includes(target)){ lit.push(target); store("litLandmarks",lit); }
-  const name=KB.places[target]?.name||"大雁塔";
+  const name=(KB.places[target]&&KB.places[target].name)||"大雁塔";
   Music.sfx("chime");
   toast("你已点亮"+name+"诗境 ✦");
   setTimeout(()=>{ go("map"); setLayer("space"); toast(name+"已在地图上亮起 ✦"); },1200);
@@ -1063,7 +1072,7 @@ const Music = (()=>{
   /* 拨弦音（古琴 / 琵琶质感） */
   function pluck(f,t,o){
     if(!ctx) return;
-    const vol=(o.vol??1)*(ducked?.25:1);
+    const vol=(o.vol==null?1:o.vol)*(ducked?.25:1);
     const out=ctx.createGain(); out.gain.value=.64*vol;
     const lp=ctx.createBiquadFilter(); lp.type="lowpass"; lp.Q.value=.6;
     lp.frequency.setValueAtTime(o.cut,t);
